@@ -39,6 +39,10 @@ A região é detectada automaticamente (por tamanho de elemento / magic do pack)
 9. **Textos (UTF-8)**: exporta/importa os textos traduzíveis (JSONC com marcador de encoding).
 10. **Converter Região**: troca o formato do pacote entre JP/US/KR/TH copiando campos pelo nome.
 
+### 🌐 Demonstração
+
+Para testar a aplicação sem fazer o clone é só [clicar aqui](https://acrisio-filho.github.io/JS-IFF-Manager/app.htm).
+
 ## Sobre este projeto
 
 A base do projeto foi feita sem auxílio de nenhum tipo de IA. A reformulação da interface e da lógica de edição foi feita com LLMs gratuitas ([OpenCode](https://opencode.ai)).
