@@ -1,0 +1,2310 @@
+/*
+- Arquivo main.css
+- Criado em 07/12/2025 as 20:10 por Acrisio
+*/
+
+:root {
+    --color: white;
+    --bg-color: #124a86;
+    --bg-color-hover: #082f59;
+    --outline: #7db4ff;
+    --bg-panel: #2a2a2a;
+    --bg-panel-dark: #1f1f1f;
+    --bg-ctrl: #3a3a3a;
+    --font-family: Arial, sans-serif, MS Gothic;
+    --font-size: 16px;
+    --color-warning: #cc5500; /* laranja queimado (aviso de encoding) */
+
+    /* bootstrap overrides: cantos retos (layout todo quadrado) */
+    --bs-border-radius: 0;
+    --bs-border-radius-sm: 0;
+    --bs-border-radius-lg: 0;
+    --bs-border-radius-xl: 0;
+    --bs-card-border-radius: 0;
+    --bs-modal-border-radius: 0;
+    --bs-btn-border-radius: 0;
+    --bs-form-control-border-radius: 0;
+    --bs-form-select-border-radius: 0;
+}
+
+/* todo canto reto, sem bordas */
+.btn,
+.btn:focus,
+.btn:active,
+.form-control,
+.form-select,
+.form-check-input,
+.form-check-label,
+.modal-content,
+.modal-dialog,
+.modal-header,
+.modal-footer,
+.modal-body,
+.btn-close,
+select,
+input,
+textarea,
+.dropdown-menu {
+    border-radius: 0 !important;
+}
+
+/* mantém os botões da marca sem borda mesmo com .btn do Bootstrap */
+.btn-load.btn,
+.btn-upload.btn {
+    border-color: var(--bg-color);
+}
+
+.btn-load.btn:focus,
+.btn-load.btn:focus-visible,
+.btn-upload.btn:focus,
+.btn-upload.btn:focus-visible {
+    box-shadow: none;
+    outline: none;
+}
+
+* {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* o projeto não tem scroll horizontal — só vertical; excesso de largura é cortado */
+html,
+body {
+    overflow-x: hidden;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    background-color: #333;
+    display: flex;
+}
+
+.main {
+    width: 100%;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 1em 1em 8px;
+    gap: 0;
+}
+
+.top-container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#div-files {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+}
+
+#div-open-controls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    min-width: 0;
+    width: 100%;
+    padding: 2px 0;
+}
+
+#div-open-controls .iff-sel-wrap {
+    flex: 1;
+    min-width: 200px;
+}
+
+#div-open-controls #div-flag-ligacao {
+    flex: 1;
+    min-width: 200px;
+    max-width: 320px;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+/* seletor de iff via Choices.js: o <select> nativo fica oculto (fonte da
+   verdade) e o widget .choices é a UI visível */
+.iff-sel-wrap {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.iff-sel-wrap .choices {
+    margin: 0;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.iff-sel-wrap .choices__inner {
+    background-color: var(--bg-color);
+    border: 1px solid var(--outline);
+    border-radius: 0;
+    height: 40px;
+    min-height: 40px;
+    box-sizing: border-box;
+    padding: 0 6px;
+    font-size: var(--font-size);
+    color: var(--color);
+}
+
+.iff-sel-wrap .choices__list--single {
+    padding: 0 16px 0 4px;
+    line-height: 38px;
+}
+
+.iff-sel-wrap .choices__item {
+    color: var(--color);
+    text-align: center;
+    font-size: var(--font-size);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.iff-sel-wrap .choices__list--dropdown {
+    background-color: var(--bg-panel-dark);
+    border: 1px solid var(--outline);
+    border-radius: 0;
+    z-index: 2000;
+}
+
+.iff-sel-wrap .choices__list--dropdown .choices__item--selectable {
+    color: var(--color);
+    font-size: var(--font-size);
+    background-color: var(--bg-panel-dark);
+    text-align: center;
+}
+
+.iff-sel-wrap .choices__list--dropdown .choices__item--selectable:hover,
+.iff-sel-wrap .choices__list--dropdown .choices__item.is-highlighted {
+    background-color: var(--outline);
+    color: #000;
+}
+
+.iff-sel-wrap .choices__list--dropdown .choices__item--selectable.iff-option-warning {
+    color: var(--color-warning);
+}
+
+.iff-sel-wrap .choices__list--dropdown .choices__item--selectable.iff-option-warning:hover,
+.iff-sel-wrap .choices__list--dropdown .choices__item--selectable.iff-option-warning.is-highlighted {
+    background-color: var(--outline);
+    color: var(--color-warning);
+}
+
+/* iff com erro de encoding: wrap laranja (só no item escolhido; as opções do
+   dropdown mantêm a cor normal para o hover funcionar) */
+.iff-sel-wrap.iff-choices-warning .choices__inner {
+    border-color: var(--color-warning);
+}
+
+.iff-sel-wrap.iff-choices-warning .choices__list--single .choices__item {
+    color: var(--color-warning);
+}
+
+#div-flag-ligacao {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+    background-color: var(--bg-color);
+    color: var(--color);
+    padding: 0 10px;
+    height: 40px;
+    max-height: 40px;
+    min-width: 200px;
+    white-space: nowrap;
+}
+
+#div-flag-ligacao input {
+    flex: 1;
+    min-width: 0;
+    height: 30px;
+    margin: 0;
+    padding: 0 5px;
+    box-sizing: border-box;
+    line-height: 24px;
+    font-size: 18px;
+}
+
+.btn-load {
+    display: inline-block;
+    padding: 3px 6px;
+    min-width: 200px;
+    max-height: 36px;
+    cursor: pointer;
+    transition: 0.3s;
+    color: var(--color);
+    background-color: var(--bg-color);
+    font-family: var(--font-family);
+    font-size: var(--font-size);
+    text-align: center;
+    line-height: 1.2;
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.btn-load:hover {
+    background-color: var(--bg-color-hover);
+}
+
+/* com pack(iff) aberto: o botão de recursos fica no tamanho do conteúdo
+   (fit) e o seletor do pack ocupa o resto (evita overflow no nome longo) */
+#div-files.has-pack #label-res-dir {
+    flex: 0 0 auto;
+    min-width: auto;
+}
+.btn-load:focus {
+    outline: none;
+}
+
+.btn-upload {
+    display: flex;
+    padding: 3px 6px;
+    min-width: 200px;
+    max-height: 36px;
+    transition: 0.3s;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--color);
+    background-color: var(--bg-color);
+    font-family: var(--font-family);
+    font-size: var(--font-size);
+    text-align: center;
+    line-height: 1.2;
+}
+
+.btn-upload:hover {
+    background-color: var(--bg-color-hover);
+}
+
+/* ------ lista de arquivos recentes (IndexedDB) ------ */
+#div-recents-toggle {
+    width: 100%;
+}
+
+.recents-toggle-btn {
+    width: 100%;
+    background: transparent;
+    color: var(--color);
+    font: inherit;
+    font-size: 16px;
+    padding: 3px 6px;
+    border: 1px solid var(--bg-color);
+    cursor: pointer;
+    text-align: left;
+}
+
+.recents-toggle-btn:hover {
+    background-color: var(--bg-color-hover);
+}
+
+#recent-files {
+    margin: 0;
+    padding: 0;
+    max-height: 120px;
+    overflow-y: auto;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--bg-color);
+    width: 100%;
+    max-width: 100%;
+}
+
+.recent-file {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 5px;
+    font-family: var(--font-family);
+    font-size: var(--font-size);
+    color: var(--color);
+    width: 100%;
+}
+
+.recent-file + .recent-file {
+    border-top: 1px solid var(--bg-ctrl);
+}
+
+.recent-open {
+    flex: 1;
+    min-width: 0;
+    display: inline-block;
+    padding: 3px 5px;
+    border: 0;
+    background: transparent;
+    color: var(--color);
+    font: inherit;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.recent-open:hover {
+    background-color: var(--bg-color-hover);
+}
+
+.recent-dl {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: var(--color);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+}
+
+.recent-dl:hover {
+    color: #7db4ff;
+}
+
+.recent-edit {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: var(--color);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+}
+
+.recent-edit:hover {
+    color: #ffcc80;
+}
+
+.recent-del {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: var(--color);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+}
+
+.recent-del:hover {
+    color: #ff8080;
+}
+
+#div-base {
+    width: 100%;
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    gap: 10px;
+}
+
+#div-list-item {
+    width: 30%;
+    min-width: 250px;
+    max-width: 350px;
+    display:flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+#item-sel {
+    overflow: auto;
+    overflow-anchor: none;
+    font-family: var(--font-family);
+    color: var(--color);
+    background-color: var(--bg-color);
+    border: 1px solid var(--bg-color);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    /* isolamento: em listas gigantes (Part.iff 9417) QUALQUER input real
+       virava long task de ~3s porque o recálculo de estilo/layout do <body>
+       cascata em todas as linhas; o contain corta essa cascata */
+    contain: layout style paint;
+}
+
+#item-sel li {
+    padding: 15px 2px 15px 7px;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    height: 25px;
+}
+
+#item-sel li .div-item {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* coluna de thumbnails do Base.icon (só existe quando algum item do iff tem
+   icon — aí todos os li ganham o slot e a lista fica alinhada como tabela) */
+#item-sel li .item-list-icon {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 7px;
+}
+
+#item-sel li .item-list-icon img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    cursor: zoom-in;
+}
+
+#item-sel li::before {
+    content: '';
+    width: 25px;
+    height: 25px;
+    display: inline-block;
+    margin-right: 7px;
+    /* dentro do flex da linha o pseudo-elemento é um flex item como outro:
+       SEM flex:none o texto longo o espreme e a coluna de thumbnails sai do
+       alinhamento entre linhas */
+    flex: none;
+}
+
+#item-sel li:hover {
+    background-color: var(--bg-color-hover);
+}
+
+#searchItem {
+    padding: 2px 4px;
+    height: 24px;
+    line-height: normal;
+    font-family: var(--font-family);
+    font-size: 12px;
+    color: var(--color);
+    background-color: var(--bg-panel-dark);
+    border: 1px solid var(--outline);
+    box-sizing: border-box;
+}
+
+/* barra de status colada na lista de itens (contador + toggle do painel) */
+.item-status-bar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: -7px;
+    gap: 4px;
+    background-color: var(--bg-color-hover);
+    border: 1px solid var(--bg-color);
+    height: 26px;
+    padding: 0 4px;
+}
+
+/* feedback visual da lista: itens visíveis / total (com filtro ativo) */
+.item-count {
+    flex: 1;
+    height: 24px;
+    line-height: 24px;
+    padding: 0 4px;
+    color: #cfe0f5;
+    font-size: 11px;
+    font-weight: bold;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.filters-toggle {
+    flex: 0 0 auto;
+    border: 1px solid var(--bg-color);
+    background: var(--bg-color);
+    color: var(--color);
+    height: 21px;
+    line-height: 21px;
+    padding: 0 6px;
+    font-family: var(--font-family);
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.filters-toggle:hover {
+    background: var(--bg-color-hover);
+}
+
+/* divide a coluna da lista em dois: o ul e o wrap (barra de status + painel
+   de filtros) dividem o espaço 50/50 quando o painel está expandido; com o
+   painel colapsado o wrap encolhe para só a barra */
+#div-item-filter-wrap {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 0 0 auto;
+    /* separa a lista do painel de filtros quando este é visível; como o
+       wrap fica display:none sem pack, a margem some e a lista ocupa tudo */
+    margin-top: 8px;
+}
+
+#div-item-filter-wrap.filters-part {
+    flex: 1 1 0%;
+    min-height: 0;
+}
+
+/* painel de filtros colapsável */
+.filters-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid var(--bg-color);
+    padding: 4px;
+    background: var(--bg-panel);
+    overflow-y: auto;
+    flex: 1 1 0%;
+    min-height: 0;
+}
+
+.filters-panel.collapsed {
+    display: none;
+}
+
+.filters-toolbar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+}
+
+.filters-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* grupos internos: sem borda, fundo mais escuro para realçar */
+.filters-groups fieldset {
+    border: 0;
+    background: var(--bg-panel-dark);
+    margin: 0;
+    padding: 3px 6px;
+}
+
+.filters-groups legend {
+    font-size: 11px;
+    padding: 0 3px;
+    color: #cfe0f5;
+}
+
+/* cada campo em UMA linha própria (o fieldset é block — cada label flex ocupa
+   a linha toda); exceções: o grupo de Estado (fg-status — checks fluem juntos
+   em inline-flex) e os pares com relação (level + operador, Período — ficam
+   num .filter-row dentro do label, na mesma linha do nome) */
+.filter-check {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-right: 8px;
+    /* respiro vertical entre as linhas do painel (sem isso ficam coladas) */
+    margin-bottom: 5px;
+    font-size: 12px;
+    color: var(--color);
+    cursor: pointer;
+    user-select: none;
+    white-space: normal;
+    flex-wrap: wrap;
+}
+
+#fg-status .filter-check {
+    display: inline-flex;
+}
+
+/* checks dos filtros viram toggle deslizante (mesma aparência do checkbox do
+   campo active: gutter + knob quadrados; o checkbox nativo fica invisível) */
+.filter-check input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    cursor: pointer;
+}
+
+.filter-check .iff-gutter {
+    margin: 0 3px;
+}
+
+.filter-check input[type="checkbox"]:checked ~ .iff-gutter {
+    background: #16325a;
+}
+
+.filter-check input[type="checkbox"]:checked ~ .iff-gutter .iff-knob {
+    left: calc(100% - 14px);
+    background: var(--outline);
+}
+
+.filter-tri-name {
+    color: #cfe0f5;
+    min-width: 60px;
+    display: inline-block;
+    overflow-wrap: anywhere;
+}
+
+/* tri-toggle dos filtros booleanos (aparência do slide do campo active) */
+.tri-toggle {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.tri-track {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    padding: 2px;
+    border: 1px solid #555;
+    background: var(--bg-ctrl);
+    line-height: 1;
+    user-select: none;
+}
+
+.tri-cell {
+    padding: 3px 7px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #999;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.tri-cell:hover {
+    color: var(--color);
+}
+
+.tri-cell.tri-on {
+    color: #000;
+    background: var(--outline);
+}
+
+.filters-groups select {
+    padding: 2px;
+    height: 24px;
+    font-family: var(--font-family);
+    font-size: 12px;
+    color: var(--color);
+    background-color: var(--bg-color);
+    border: 1px solid var(--bg-color);
+}
+
+/* pares com relação que ficam soltos no fieldset (level op+valor) seguem o
+   mesmo respiro das linhas */
+.filters-groups .filter-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 5px;
+}
+
+/* inputs numéricos/date pareados com select de operador (op+valor) no painel
+   de filtros: mesma altura/fundo/borda dos selects. .filter-row input[type=number]
+   pega qualquer op+valor numérico; #f-grandprix-time-wrap pega o datepicker */
+.filters-groups .filter-num-input,
+.filters-groups .filter-row input[type="number"],
+#f-grandprix-time-wrap input {
+    height: 24px;
+    padding: 2px;
+    font-family: var(--font-family);
+    font-size: 12px;
+    color: var(--color);
+    background-color: var(--bg-panel-dark);
+    border: 1px solid var(--outline);
+    box-sizing: border-box;
+}
+.filters-groups .filter-num-input,
+.filters-groups .filter-row input[type="number"] {
+    width: 110px;
+}
+
+/* cabeçalho SEM quebra de linha: os 6 botões (abrir/recursos/textos/salvar/
+   baixar/fechar) cabem juntos até em 1024x768 — sem min-width e sem wrap */
+#div-files > div:first-child {
+    flex-wrap: nowrap;
+}
+
+#div-files > div:first-child .btn-load.btn,
+#div-files > div:first-child .btn-upload.btn {
+    min-width: 0;
+    white-space: nowrap;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* modal largo dos textos: os 3 botões na MESMA linha mesmo estreito */
+.modal-dialog-wide {
+    max-width: min(780px, calc(100vw - 24px));
+}
+
+.modal-dialog-wide .modal-footer {
+    flex-wrap: nowrap;
+    gap: 6px;
+}
+
+.modal-dialog-wide .modal-footer .btn {
+    white-space: nowrap;
+    flex: 1 1 auto;
+    padding: 0.375rem 0.6rem;
+    font-size: 0.95rem;
+}
+
+.f-level-select {
+    min-width: 52px;
+}
+
+.item-new {
+    color: gold;
+    font-weight: bold;
+}
+.item-disable {
+    color: gray;
+    font-weight: bold;
+}
+.item-modified {
+    color: black;
+    font-weight: bold;
+}
+/* cor do aviso vem ANTES de .item-deleted: delete vence a cor */
+.item-encoding {
+    color: var(--color-warning);
+    font-weight: bold;
+}
+.item-deleted {
+    color: darkred;
+    font-weight: bold;
+}
+.item-hide {
+    display: none !important;
+}
+/* filtro "Ocultos": mostra os itens escondidos (item-hide) na lista */
+#item-sel li.item-hide.item-show-hidden {
+    display: flex !important;
+}
+.item-selected {
+    background-color: var(--outline);
+}
+
+/* texto do selected sem estado de modificação (senão some sobre a cor clara) */
+#item-sel li.item-selected:not(.item-deleted):not(.item-new):not(.item-modified):not(.item-disable):not(.item-encoding) {
+    color: #0b2f4a;
+    font-weight: bold;
+}
+
+/* hover sobre selected SEM estado: fonte volta ao branco padrão do projeto */
+#item-sel li.item-selected:hover:not(.item-deleted):not(.item-new):not(.item-modified):not(.item-disable):not(.item-encoding) {
+    color: var(--color);
+}
+
+/* hover geral: itens sem estado também ficam brancos (padrão) */
+#item-sel li:hover:not(.item-deleted):not(.item-new):not(.item-modified):not(.item-disable):not(.item-encoding) {
+    color: var(--color);
+}
+.item-hidden {
+    display: none !important;
+}
+
+.item-modified::before {
+    content: '';
+    width: 25px;
+    flex: none;
+    height: 25px;
+    display: inline-block;
+    background: url('resources/table_edit.svg') no-repeat center;
+    background-size: contain;
+    margin-right: 7px;
+}
+.item-new::before {
+    content: '';
+    width: 25px;
+    flex: none;
+    height: 25px;
+    display: inline-block;
+    background: url('resources/fiber_new.svg') no-repeat center;
+    background-size: contain;
+    margin-right: 7px;
+}
+.item-deleted::before {
+    content: '';
+    width: 25px;
+    flex: none;
+    height: 25px;
+    display: inline-block;
+    background: url('resources/delete_sweep.svg') no-repeat center;
+    background-size: contain;
+    margin-right: 7px;
+}
+
+/* item com erro de encoding: ícone de aviso à esquerda, após .item-deleted::before
+   (ícone do aviso vence o do delete) */
+.item-encoding::before {
+    content: '';
+    width: 25px;
+    height: 25px;
+    display: inline-block;
+    flex-shrink: 0;
+    background: url('resources/warning.svg') no-repeat center;
+    background-size: contain;
+    margin-right: 7px;
+}
+
+/* modal de aviso de encoding: corpo com rolagem */
+.encoding-warning-modal .modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+.encoding-warning-iff {
+    font-weight: bold;
+    color: var(--color-warning);
+    margin-top: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+.encoding-warning-iff .encoding-warning-icon {
+    width: 16px;
+    height: 16px;
+    vertical-align: -3px;
+    margin-right: 4px;
+}
+.encoding-warning-iff .encoding-warning-chevron {
+    display: inline-block;
+    width: 14px;
+    margin-left: 8px;
+    padding: 0 6px;
+    text-align: center;
+    border-radius: 4px;
+}
+.encoding-warning-iff:hover .encoding-warning-chevron {
+    background-color: var(--color-hover, rgba(255, 255, 255, 0.1));
+}
+.encoding-warning-list {
+    margin: 4px 0 12px 20px;
+    padding: 0;
+}
+.encoding-warning-list.encoding-warning-collapsed {
+    display: none;
+}
+
+#div-geral-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 10px;
+    overflow: auto;
+    padding: 5px;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--bg-color);
+}
+
+#div-geral-info input {
+    height: 20px;
+    padding: 5px;
+}
+
+#div-geral-info textarea {
+    min-height: 80px;
+    padding: 5px;
+}
+
+.context-menu {
+    position: absolute;
+    display: none;
+    flex-direction: column;
+    color: var(--color);
+    background-color: var(--bg-color);
+    list-style: none;
+    padding: 5px 0;
+    width: 150px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.context-menu li {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.context-menu li:hover {
+    background-color: var(--bg-color-hover);
+}
+
+.type-label {
+    color: var(--color);
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.field-col {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    margin-bottom: 4px;
+    min-width: 0;
+}
+
+.field-col .type-label {
+    margin-right: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* painel de info: o campo NÃO é espremido pelo label — quando label + campo
+   não cabem na linha, o campo quebra para a linha de baixo com a largura
+   natural dele (o tamanho que teria sem o label) */
+#div-geral-info .field-col {
+    flex-wrap: wrap;
+    row-gap: 2px;
+}
+
+#div-geral-info .field-col > .choices {
+    flex-shrink: 0;
+}
+
+.field-col input {
+    flex: 1;
+    min-width: 0;
+}
+
+/* input de data (flatpickr) com botão de limpar dentro, à direita */
+.date-input-wrap {
+    position: relative;
+    display: flex;
+    flex: 1;
+    min-width: 0;
+}
+
+.date-input-wrap input[type="text"] {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    padding-right: 24px;
+    box-sizing: border-box;
+}
+
+.date-clear-btn {
+    position: absolute;
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    color: #6c757d;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+}
+
+.date-input-wrap.has-value .date-clear-btn {
+    display: inline-flex;
+}
+
+.date-clear-btn:hover {
+    color: #ff8080;
+}
+
+.date-input-wrap:not(.has-value) input[type="text"] {
+    padding-right: 8px;
+}
+
+/* inputs de data bloqueados pelo active_date (inativo) — cursor e opacidade
+   iguais ao toggle bloqueado */
+.date-input-wrap input[type="text"]:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* botão de limpar a data também bloqueado quando o grupo date está inativo */
+.date-input-wrap .date-clear-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    color: #6c757d;
+}
+
+/* campos desabilitados em geral: mouse vira "proibido" (padrão dos toggles/datas)
+   — inclui o period do time_shop com active=0 */
+input:disabled,
+select:disabled,
+textarea:disabled {
+    cursor: not-allowed;
+}
+
+#div-geral-info .num-input-wrap input:disabled {
+    opacity: 0.55;
+}
+
+/* input de arquivo (asset) com botão de seleção dentro, à direita */
+.asset-file-wrap {
+    position: relative;
+    display: flex;
+    flex: 1;
+    min-width: 0;
+}
+
+#div-geral-info .asset-file-wrap input[type="text"] {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    padding-right: 24px;
+    box-sizing: border-box;
+}
+
+/* preview da imagem à esquerda dentro do input (só aparece com .has-image) */
+#div-geral-info .asset-file-wrap.has-image input[type="text"] {
+    padding-left: 36px;
+}
+
+.asset-file-img {
+    position: absolute;
+    left: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px;
+    height: calc(100% - 6px);
+    object-fit: fill;
+    cursor: zoom-in;
+    display: none;
+}
+
+.asset-file-wrap.has-image .asset-file-img {
+    display: inline-block;
+}
+
+.asset-file-btn {
+    position: absolute;
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    color: #6c757d;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+}
+
+.asset-file-btn:hover {
+    color: #ffcc80;
+}
+
+/* botão de escolher item do Part.iff (sub_part) no canto direito do input */
+.num-input-wrap.typeid-pick input[type="text"] {
+    padding-right: 24px;
+}
+
+.typeid-pick-btn {
+    position: absolute;
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    color: #6c757d;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+}
+
+.typeid-pick-btn:hover {
+    color: #ffcc80;
+}
+
+/* modal de escolher item do Part.iff (lista com filtro, como a lista de itens) */
+.part-item-list-modal .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 70vh;
+    padding: 12px;
+}
+
+.part-pick-search-wrap input[type="text"] {
+    padding-right: 24px;
+    box-sizing: border-box;
+}
+
+.part-pick-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+    flex: 1;
+    border: 1px solid var(--bg-ctrl);
+    max-height: 55vh;
+}
+
+.part-pick-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--bg-ctrl);
+}
+
+.part-pick-list li:hover {
+    background: var(--bg-ctrl);
+}
+
+.part-pick-list .div-item {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.part-pick-typeid {
+    font-size: 11px;
+    color: #6c757d;
+    font-family: monospace;
+}
+
+/* árvore multi-iff do ItemListModal: iff com chevron + sublista lazy */
+.part-pick-list .part-pick-iff {
+    display: block;
+    padding: 0;
+}
+
+.part-pick-iff-head {
+    padding: 4px 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.part-pick-iff-head:hover {
+    background: var(--bg-ctrl);
+}
+
+.part-pick-sublist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: none;
+}
+
+.part-pick-sublist.part-pick-open {
+    display: block;
+}
+
+.part-pick-sublist li {
+    padding-left: 24px;
+}
+
+/* Choices.js no modal de novo item (multi select de tags do sub_type)
+   adaptado ao tema escuro do editor */
+.choices-select-wrap .choices {
+    margin-bottom: 0;
+}
+
+.choices-select-wrap .choices__inner {
+    border-radius: 0;
+    background: var(--bg-ctrl);
+    font-size: 1rem;
+}
+
+.choices-select-wrap .choices[data-type*="select-multiple"] .choices__input {
+    background: transparent;
+}
+
+.choices-select-wrap .choices__list--multiple .choices__item {
+    border-radius: 0;
+    background: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.choices-select-wrap .choices__list--dropdown {
+    border-radius: 0;
+    background: var(--bg-ctrl);
+    border-color: var(--bg-ctrl);
+}
+
+.choices-select-wrap .choices__list--dropdown .choices__item--selectable.is-highlighted {
+    background: var(--outline);
+    color: #000;
+}
+
+/* modal com a imagem do campo asset em tamanho maior */
+.resource-img-modal .modal-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+.resource-img-modal .resource-img-full {
+    width: 100%;
+    height: calc(75vh - 56px);
+    object-fit: contain;
+    border: 1px solid var(--bg-ctrl);
+}
+
+.date-clear-btn:hover {
+    color: #ff8080;
+}
+
+.bitfield-layout {
+    background-color: var(--bg-panel-dark);
+    color: var(--color);
+    padding: 5px;
+    border-radius: 0;
+}
+
+.bitfield-layout .bitfield-title {
+    font-weight: bold;
+    display: inline-block;
+}
+
+.bitfield-layout .bitfield-layout {
+    background-color: #333;
+}
+
+.bitfield-layout .bitfield-value {
+    margin-left: 5px;
+}
+
+/* botão que abre o editor do bitfield (ícone SVG de grade de bits, no lugar
+   do clique no campo) */
+.bitfield-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: transparent;
+    border: 0;
+    color: #8a8a8a;
+    padding: 0;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.bitfield-edit-btn .bitfield-edit-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.bitfield-edit-btn:hover .bitfield-edit-icon {
+    filter: brightness(1.4);
+}
+
+.bitfield-layout .bitfield-value + .bitfield-edit-btn {
+    margin-left: 5px;
+}
+
+ .bitfield-group-row {
+     display: flex;
+     align-items: center;
+     gap: 6px;
+     padding: 2px 0;
+ }
+
+ .bitfield-group-row .bitfield-edit-btn {
+     margin-left: auto;
+ }
+
+  /* sem hover no campo — o hover fica só no botão de editar (.bitfield-edit-btn) */
+
+/* bit travado no modal do bitfield (ex.: slot do typeid no position_mask) */
+.bitfield-locked .iff-toggle {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.bitfield-modal-group {
+    background: var(--bg-panel-dark);
+    padding: 8px 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.bitfield-modal-group h6 {
+    margin: 0 0 6px 0;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--bg-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.bitfield-locked .iff-toggle input {
+    cursor: not-allowed;
+}
+
+/* toggle desabilitado no layout (ex.: time_shop.active / active_date
+   bloqueados) — mesmo visual/cursor do bit travado no editor de bitfield */
+.iff-toggle input:disabled ~ .iff-track {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.iff-toggle input:disabled {
+    cursor: not-allowed;
+}
+
+.iff-toggle:has(input:disabled) {
+    cursor: not-allowed;
+}
+
+.bool-field {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.bitfield-layout .bitfield-group-check .form-check-label {
+    padding: 6px 8px;
+    border-radius: 0;
+    cursor: pointer;
+}
+
+.bitfield-layout .bitfield-group-check .form-check-label:hover {
+    background-color: var(--bg-ctrl);
+}
+
+.array-field-group {
+    background-color: var(--bg-panel-dark);
+    color: var(--color);
+    padding: 5px;
+    border-radius: 0;
+    margin-bottom: 5px;
+}
+
+.array-field-group .array-field-title {
+    font-weight: bold;
+    margin: 0 0 6px 0;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--bg-color);
+}
+
+.array-field-group .array-field-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+}
+
+.array-field-group .array-field-row > * {
+    flex-grow: 1;
+    min-width: max-content;
+}
+
+.array-field-group .array-field-row input {
+    min-width: 0;
+}
+
+.array-field-group .array-field-row .pair-field-row {
+    flex-basis: 52ch;
+}
+
+/* seção de sub-objeto (classLayout): campos empilhados igual ao painel */
+.object-field-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pair-field-row {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.pair-field-row input {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.loading-overlay[hidden] {
+    display: none;
+}
+
+/* mesmo visual do modal (bg-panel + borda), centralizado; a lista vaza até a
+   borda direita da CAIXA (não da tela) para a scrollbar ficar no canto do overlay */
+.loading-box {
+    background-color: var(--bg-panel);
+    color: var(--color);
+    border: 1px solid #444;
+    padding: 14px 16px;
+    min-width: 320px;
+    max-width: 480px;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* barra de progresso do overlay (export/import de textos etc.) */
+.loading-progress {
+    position: relative;
+    height: 18px;
+    border: 1px solid #444;
+    background-color: var(--bg-panel-dark);
+    overflow: hidden;
+}
+
+.loading-progress-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--outline);
+}
+
+.loading-progress-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.loading-box .loading-title {
+    font-size: 15px;
+    font-weight: bold;
+    border-bottom: 1px solid #444;
+    padding-bottom: 8px;
+}
+
+.loading-box .loading-files {
+    overflow: auto;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    /* estica até a borda direita da caixa: a scrollbar cola nela */
+    margin-right: -16px;
+    padding-right: 16px;
+}
+
+/* scrollbar do tema em todo o app (quadrada, sem cantos — mesma do overlay
+   load/save): todas as listas/áreas com overflow usam esse visual */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-panel-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #444;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+html {
+    scrollbar-color: #444 var(--bg-panel-dark);
+    /* gutter fixa: o modal do Bootstrap alterna overflow no body e, sem ela,
+       a largura do viewport muda e relayout global (lista de 9417 itens) */
+    scrollbar-gutter: stable;
+}
+
+.loading-box .loading-files .loading-file {
+    padding: 2px 0;
+}
+
+/* arquivo com erro de encoding fica laranja na tela de loading */
+.loading-box .loading-files .loading-file.loading-file-warning {
+    color: var(--color-warning);
+    font-weight: bold;
+}
+
+/* todos os .form-check agora usam toggle custom (sem checkbox nativo), sem recuo esquerdo */
+.form-check {
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+/* ------ toggle deslizante (slide on/off, estilo quadrado do app) ------ */
+.iff-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.iff-toggle input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.iff-track {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px;
+    border: 1px solid #555;
+    background: var(--bg-panel-dark);
+    user-select: none;
+    line-height: 1;
+    transition: border-color 0.15s, background 0.15s;
+    max-width: 100%;
+}
+
+/* selects/inputs compactos nos painéis, sem altura forçada pelo bootstrap */
+#div-geral-info select,
+#div-geral-info .form-select,
+.field-col select,
+.field-col textarea,
+.pair-field-row input,
+.bitfield-layout select {
+    font-size: var(--font-size);
+    line-height: 1;
+    height: auto;
+    padding: 3px 5px;
+    box-sizing: border-box;
+}
+
+select.form-select.level-select {
+    font-size: var(--font-size);
+    line-height: 1;
+    height: auto;
+    padding: 3px 28px 3px 5px;
+    width: auto;
+}
+
+#div-geral-info input {
+    font-size: var(--font-size);
+    line-height: 1;
+}
+
+.iff-face {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+}
+
+.iff-label--name {
+    color: #aaa;
+}
+
+/* toggle de estado (ex.: dec/hex): mostra os dois textos alternados */
+.iff-toggle--state .iff-label--neg {
+    display: inline-flex;
+}
+
+.iff-toggle--state .iff-label--pos {
+    display: none;
+}
+
+.iff-toggle--state input:checked ~ .iff-track .iff-label--neg {
+    display: none;
+}
+
+.iff-toggle--state input:checked ~ .iff-track .iff-label--pos {
+    display: inline-flex;
+}
+
+/* toggle dentro do input numérico (sobreposto no lado esquerdo) */
+.num-input-wrap {
+    position: relative;
+    display: block;
+    flex: 1;
+    min-width: 0;
+}
+
+.num-input-wrap .iff-toggle--state {
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.num-input-wrap .iff-toggle--state .iff-track {
+    border: 0;
+    padding: 0;
+    background: var(--bg-ctrl);
+    line-height: 1;
+}
+
+.num-input-wrap .iff-toggle--state input:checked ~ .iff-track {
+    background: var(--bg-ctrl);
+}
+
+.num-input-wrap .iff-toggle--state .iff-gutter,
+.num-input-wrap .iff-toggle--state .iff-knob {
+    display: none;
+}
+
+.num-input-wrap .iff-toggle--state .iff-label--pos,
+.num-input-wrap .iff-toggle--state .iff-label--neg {
+    color: var(--outline);
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: lowercase;
+    padding: 2px 5px;
+}
+
+#div-geral-info .num-input-wrap input[type="text"] {
+    display: block;
+    width: 100%;
+    padding-left: 40px;
+    box-sizing: border-box;
+}
+
+/* input do valor do bitfield no modal: toggle dec/hex sobreposto igual ao
+   layout (#div-geral-info), mas sem depender do container */
+.modal .num-input-wrap input[type="text"] {
+    display: block;
+    width: 100%;
+    padding-left: 40px;
+    box-sizing: border-box;
+}
+
+.modal .num-input-wrap {
+    margin-bottom: 8px;
+}
+
+/* precos do shop: toggle dec/hex + label pang/cash DENTRO do input */
+#div-geral-info .num-input-wrap.price-input-wrap input[type="text"] {
+    padding-left: 89px;
+}
+
+.price-prefix {
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    z-index: 1;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: lowercase;
+    white-space: nowrap;
+}
+
+.price-prefix .iff-toggle--state {
+    position: static;
+    transform: none;
+}
+
+.price-prefix .price-sep {
+    color: #888;
+    font-weight: normal;
+}
+
+.price-cur {
+    background: var(--bg-ctrl);
+    padding: 0 4px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.price-cur.pang {
+    color: #c8932f; /* amarelo queimado */
+}
+
+.price-cur.cash {
+    color: #2fa84f; /* verde da cor do dolar */
+}
+
+.price-cur {
+    cursor: pointer;
+}
+
+.price-cur:hover {
+    background-color: var(--bg-panel);
+}
+
+.app-footer {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--color);
+    background: var(--bg-panel-dark);
+    border-top: 1px solid var(--bg-color);
+}
+
+.app-footer-note {
+    color: #aaa;
+}
+
+.app-footer a {
+    color: var(--outline);
+    text-decoration: none;
+}
+
+.app-footer a:hover {
+    text-decoration: underline;
+}
+
+/* flag de ligação do topo: input com toggle dec/hex dentro do wrap */
+#div-flag-ligacao .num-input-wrap input[type="text"] {
+    display: block;
+    width: 100%;
+    padding-left: 50px;
+    box-sizing: border-box;
+}
+
+/* toggle dec/hex da flag de ligação: mais alto/largo p/ acompanhar o input de 30px */
+#div-flag-ligacao .iff-toggle--state .iff-track {
+    height: 26px;
+    align-items: center;
+}
+
+#div-flag-ligacao .iff-toggle--state .iff-label--pos,
+#div-flag-ligacao .iff-toggle--state .iff-label--neg {
+    font-size: 14px;
+    padding: 3px 8px;
+}
+
+.iff-gutter {
+    position: relative;
+    width: 26px;
+    height: 12px;
+    flex-shrink: 0;
+    background: #333;
+}
+
+.iff-knob {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 14px;
+    height: 12px;
+    background: #666;
+    transition: left 0.18s, background 0.18s;
+}
+
+.iff-toggle input:checked ~ .iff-track {
+    border-color: var(--outline);
+    background: #16325a;
+}
+
+.iff-toggle input:checked ~ .iff-track .iff-label--name {
+    color: var(--outline);
+}
+
+.iff-toggle input:checked ~ .iff-track .iff-knob {
+    left: calc(100% - 14px);
+    background: var(--outline);
+}
+
+.iff-toggle:hover .iff-track {
+    background-color: var(--bg-panel);
+}
+
+.iff-toggle input:checked:hover ~ .iff-track {
+    background-color: #1a3a66;
+}
+
+/* ------ modais seguem o tema escuro do app ------ */
+.modal-content {
+    background-color: var(--bg-panel);
+    color: var(--color);
+}
+
+.modal-header,
+.modal-footer {
+    border-color: #444;
+}
+
+.modal-title {
+    color: var(--color);
+}
+
+.modal-body {
+    color: var(--color);
+}
+
+.modal-body label,
+.modal-body .type-label,
+.modal-body .form-check-label {
+    color: var(--color);
+}
+
+.modal-body input,
+.modal-body select,
+.modal-body textarea,
+.modal-footer .btn-close {
+    background-color: #333;
+    color: var(--color);
+    border-color: #555 !important;
+    border-radius: 0;
+}
+
+.modal-body .form-control,
+.modal-body .form-select {
+    background-color: #333;
+    color: var(--color);
+    border-color: #555 !important;
+}
+
+.modal-body select option {
+    background-color: var(--bg-panel);
+    color: var(--color);
+}
+
+.modal .btn-primary {
+    background-color: var(--bg-color);
+    border-color: var(--bg-color);
+    color: var(--color);
+}
+
+.modal .btn-primary:hover,
+.modal .btn-primary:focus,
+.modal .btn-primary:active {
+    background-color: var(--bg-color-hover);
+    border-color: var(--bg-color-hover);
+    color: var(--color);
+}
+
+.modal .btn-secondary {
+    background-color: #333;
+    border-color: #555;
+    color: var(--color);
+}
+
+.modal .btn-secondary:hover,
+.modal .btn-secondary:focus,
+.modal .btn-secondary:active {
+    background-color: #444;
+    border-color: #666;
+    color: var(--color);
+}
+
+/* botões dentro do corpo do modal: sem quebra de linha e na mesma altura do input */
+.modal-body .btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+    height: auto;
+    align-self: stretch;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ---- tema dark dos widgets do Choices.js (todas as instâncias) ---- */
+
+.choices {
+    font-size: var(--font-size);
+}
+
+.choices__inner {
+    background-color: var(--bg-panel-dark);
+    border: 1px solid var(--outline);
+    border-radius: 0;
+    min-height: 34px;
+    font-size: var(--font-size);
+    color: var(--color);
+}
+
+.choices__inner:hover {
+    border-color: var(--outline);
+}
+
+.choices__placeholder {
+    color: var(--color) !important;
+    opacity: 0.6;
+}
+
+.choices__item {
+    color: var(--color);
+    font-size: var(--font-size);
+}
+
+.choices__list--single .choices__item {
+    text-align: center;
+}
+
+/* item escolhido (select múltiplo): chip */
+.choices__list--multiple .choices__item {
+    background-color: var(--bg-color-hover);
+    border-color: var(--outline);
+    border-radius: 0;
+    color: var(--color);
+}
+
+.choices__list--multiple .choices__item .choices__button {
+    border-left: 1px solid var(--outline);
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2'%3e%3cpath d='M18 6L6 18M6 6l12 12'/%3e%3c/svg%3e");
+    opacity: 0.7;
+}
+
+.choices__list--dropdown {
+    background-color: var(--bg-panel-dark);
+    border: 1px solid var(--outline);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 2000;
+    font-size: var(--font-size);
+}
+
+.choices__list--dropdown .choices__item {
+    background-color: var(--bg-panel-dark);
+    color: var(--color);
+    font-size: var(--font-size);
+}
+
+.choices__list--dropdown .choices__item--selectable.is-highlighted,
+.choices__list--dropdown .choices__item--selectable:hover {
+    background-color: var(--outline);
+    color: #000;
+}
+
+.choices__list--dropdown .choices__item--selectable.is-highlighted::after {
+    display: none;
+}
+
+.choices__list--dropdown .choices__item--disabled {
+    opacity: 0.5;
+}
+
+.choices__list--dropdown .choices__group {
+    color: var(--color-warning);
+    font-size: calc(var(--font-size) - 2px);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-left: 8px;
+}
+
+.choices__list--dropdown .choices__group .choices__group-name {
+    font-weight: bold;
+}
+
+.choices__input {
+    background-color: var(--bg-panel-dark) !important;
+    color: var(--color) !important;
+    font-size: var(--font-size);
+    border-radius: 0;
+}
+
+.choices__input::placeholder {
+    color: var(--color) !important;
+    opacity: 0.5;
+}
+
+/* dropdown aberto */
+.choices.is-open .choices__list--dropdown {
+    z-index: 2000;
+}
+
+.choices.is-open .choices__inner {
+    border-radius: 0;
+}
+
+/* botão de abrir (seta) */
+.choices[data-type*="select-one"] .choices__inner::after {
+    border-color: var(--color) transparent transparent;
+    border-width: 5px;
+    margin-top: -2.5px;
+}
+
+.choices[data-type*="select-one"].is-open .choices__inner::after {
+    border-color: transparent transparent var(--color);
+}
+
+.choices__list--dropdown::-webkit-scrollbar,
+.choices__list--dropdown .choices__scroll {
+    scrollbar-width: thin;
+}
+
+/* layout do item (#div-geral-info): altura e fonte adequadas aos campos */
+#div-geral-info .choices {
+    margin: 0;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+#div-geral-info .choices__inner {
+    min-height: 30px;
+    height: 30px;
+    padding: 2px 6px;
+    font-size: 13px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+}
+
+#div-geral-info .choices__list--single {
+    padding: 0;
+    line-height: normal;
+}
+
+#div-geral-info .choices__item,
+#div-geral-info .choices__list--dropdown .choices__item {
+    font-size: 13px;
+}
+
+#div-geral-info .choices__list--single .choices__item {
+    text-align: left;
+}
+
+/* painel de filtros: widget junto dos checks */
+#div-item-filter .choices {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    /* o vendor põe margin-bottom:24px no .choices — no painel os campos ficam
+       um por linha e o margin desalinhava os pares (level/Período) e
+       adicionava espaço extra abaixo de cada campo */
+    margin-bottom: 0;
+}
+
+#div-item-filter .filter-check .choices {
+    flex: 1;
+    min-width: 60px;
+}
+
+#div-item-filter .choices__inner {
+    min-height: 24px;
+    height: 24px;
+    padding: 0 4px;
+    font-size: 12px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+}
+
+#div-item-filter .choices__list--single {
+    padding: 0;
+    line-height: normal;
+}
+
+#div-item-filter .choices__item,
+#div-item-filter .choices__list--dropdown .choices__item {
+    font-size: 12px;
+}
+
+#div-item-filter .choices__list--single .choices__item {
+    text-align: left;
+}
+
+/* dropdowns do layout e do painel de filtros: ajusta largura ao maior texto */
+#div-geral-info .choices__list--dropdown,
+#div-item-filter .choices__list--dropdown {
+    width: max-content;
+    min-width: 100%;
+    max-width: calc(100vw - 48px);
+    box-sizing: border-box;
+}
+
+#div-geral-info .choices__list--dropdown .choices__item--selectable,
+#div-item-filter .choices__list--dropdown .choices__item--selectable {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+    padding: 4px 8px;
+}
+
+/* Hex editor (campo para arrays de bytes desconhecidos) */
+.hexeditor {
+    flex: 1 1 auto;
+    width: 100%;
+    height: 120px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid var(--bg-color);
+    background: var(--bg-panel-dark);
+    padding: 4px 6px;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--color);
+    box-sizing: border-box;
+}
+/* hex-grow: o painel vira coluna flex e o editor ocupa o espaço que sobra,
+   encolhendo até o mínimo quando falta espaço (sem scroll no painel). O label
+   fica no topo alinhado à esquerda (ex.: unknown do GrandPrixAIOptionalData,
+   SetEffectTable) */
+#div-geral-info {
+    display: flex;
+    flex-direction: column;
+}
+#div-geral-info > * {
+    flex-shrink: 0;
+}
+#div-geral-info > .field-col:has(> .hexeditor) {
+    display: flex;
+    flex-direction: column;
+
+    /* SEM wrap: com direção coluna e o editor alto enchendo o painel, o wrap
+       criava uma SEGUNDA COLUNA e o label acabava ao lado do box */
+    flex-wrap: nowrap;
+}
+#div-geral-info > .field-col:has(> .hexeditor) .type-label {
+    align-self: flex-start;
+    text-align: left;
+    margin-bottom: 2px;
+}
+#div-geral-info > .field-col:has(> .hexeditor.hex-grow) {
+    flex: 1 1 auto;
+    min-height: 120px;
+}
+.hexeditor.hex-grow {
+    height: auto;
+    flex: 1 1 auto;
+    min-height: 100px;
+    margin-bottom: 5px;
+}
+.hexeditor .hex-row {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+}
+.hexeditor .hex-offset {
+    color: var(--color-warning);
+    margin-right: 8px;
+    user-select: none;
+    flex: 0 0 auto;
+}
+.hexeditor .hex-byte {
+    width: 22px;
+    min-width: 22px;
+    text-align: center;
+    border: 1px solid var(--bg-ctrl);
+    background: var(--bg-panel-dark);
+    color: var(--color);
+    font-family: inherit;
+    font-size: inherit;
+    text-transform: uppercase;
+    padding: 0;
+    box-sizing: border-box;
+}
+.hexeditor .hex-byte:focus {
+    outline: none;
+    border-color: var(--outline);
+    background: var(--bg-ctrl);
+    color: var(--color);
+}
+.hexeditor .hex-ascii {
+    color: var(--color);
+    margin-left: 12px;
+    user-select: none;
+    white-space: pre;
+    flex: 0 0 auto;
+}
+
+/* GrandPrixData: open/start/end na mesma linha */
+.gp-times-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    width: 100%;
+    background: var(--bg-panel-dark);
+    padding: 8px 10px;
+}
+.gp-times-row .array-field-group {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+/* GrandPrixData: open/start/end com label em cima (tabela) */
+.gp-time-cell {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-width: 0;
+}
+.gp-time-label {
+    font-size: var(--font-size);
+    color: #fff;
+    margin-bottom: 2px;
+    font-weight: 600;
+}
+
+/* espaçadores da lista virtualizada (altura total preservada) */
+.list-spacer {
+    width: 1px;
+    flex: none;
+}

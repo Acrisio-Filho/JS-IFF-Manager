@@ -1,0 +1,883 @@
+<!--
+- Arquivo app.htm
+- Criado em 07/12/2025 as 20:10 por Acrisio
+-->
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="utf-8">
+        <link rel="icon" type="image/png" href="resources/favicon.png">
+        <title>JS IFF Manager</title>
+        <script src="includes/jszip.min.js" defer></script>
+        <script src="includes/unzipit.min.js" defer></script>
+        <script src="includes/iconv.bundle.js" defer></script>
+
+        <script src="includes/jquery.min.js"></script>
+        <script src="includes/bootstrap.bundle.min.js"></script>
+        <script src="includes/choices.min.js"></script>
+        <script src="includes/flatpickr"></script>
+
+        <script src="modal.js" defer></script>
+        <script src="viewer.js" defer></script>
+        <script src="main.js" defer></script>
+    <script src="region-us.js" defer></script>
+    <script src="region-th.js" defer></script>
+    <script src="xtea-th.js" defer></script>
+    <script src="app.js" defer></script>
+        <script src="ui.js" defer></script>
+
+        <link href="includes/bootstrap.min.css" rel="stylesheet">
+        <link href="includes/choices.min.css" rel="stylesheet">
+        <link href="includes/flatpickr.min.css" rel="stylesheet">
+
+        <link rel="stylesheet" href="main.css">
+
+        <script src="includes/tailwind.min.js"></script>
+        <script>
+            if (this.tailwind) {
+                tailwind.config = Object.assign(tailwind.config || {}, { corePlugins: { preflight: false } });
+            }
+        </script>
+    </head>
+<body>
+        <div class="main flex w-full flex-1 flex-col overflow-hidden">
+            <div class="top-container flex w-full flex-wrap items-start justify-center gap-2.5">
+                <div id="div-files" class="flex flex-col gap-1.5">
+                    <div class="flex flex-row items-center justify-center gap-2.5">
+                        <input type="file" id="zipInput" accept=".iff" hidden>
+                        <label for="zipInput" class="btn-load btn btn-primary flex items-center justify-center text-center">Selecione o arquivo IFF</label>
+                        <input type="file" id="resDirInput" webkitdirectory directory hidden>
+                        <label for="resDirInput" id="label-res-dir" class="btn-load btn btn-primary flex items-center justify-center text-center">Diretório de Recursos</label>
+                        <input type="file" id="textosInput" accept=".jsonc,.json,application/json,text/plain" hidden>
+                        <div id="div-textos-iff" class="btn-upload btn btn-primary flex items-center justify-center text-center" hidden
+                             title="Exportar/Importar textos traduzíveis — arquivo JSONC em UTF-8">
+                            Textos (UTF-8)
+                        </div>
+                        <div id="div-converter-regiao" class="btn-upload btn btn-primary flex items-center justify-center text-center whitespace-nowrap" hidden
+                             title="Converter o arquivo entre as regiões suportadas">
+                            Converter Região
+                        </div>
+                        <div id="div-save-iff" class="btn-upload btn btn-primary flex items-center justify-center text-center" hidden>
+                            Salvar
+                        </div>
+                        <div id="div-download-iff" class="btn-upload btn btn-primary flex items-center justify-center text-center" hidden>
+                            Baixar
+                        </div>
+                        <div id="div-close-iff" class="btn-upload btn btn-primary flex items-center justify-center text-center" hidden>
+                            Fechar
+                        </div>
+                    </div>
+                    <div id="div-recents-toggle" class="flex flex-row items-center justify-start" hidden>
+                        <button id="btn-toggle-recents" type="button" class="recents-toggle-btn" title="Mostrar/ocultar lista de recentes">▴ Recentes</button>
+                    </div>
+                    <ul id="recent-files" class="flex flex-col list-none gap-1" hidden></ul>
+                    <div id="div-open-controls" class="flex flex-row items-center justify-center gap-2.5" hidden>
+                        <div id="iff-sel-wrap" class="iff-sel-wrap">
+                            <select id="iff-sel" hidden></select>
+                        </div>
+                        <div id="div-flag-ligacao" class="flex flex-row items-center gap-1 whitespace-nowrap px-2.5">
+                            <span class="flex shrink-0">Flag de Ligação:</span>
+                            <div id="flag-ligacao-wrap" class="num-input-wrap">
+                                <input id="i-flag-ligacao" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="div-base" class="flex w-full min-h-0 flex-1">
+                <div id="div-list-item" class="flex flex-col">
+                    <ul id="item-sel" tabIndex="0" class="flex list-none flex-1 flex-col overflow-auto"></ul>
+                    <div id="div-item-filter-wrap" class="flex flex-col min-h-0">
+                        <div id="div-item-status" class="item-status-bar">
+                            <span id="itemCount" class="item-count" title="Itens visíveis / total">0 / 0</span>
+                            <button type="button" id="btn-toggle-filters" class="filters-toggle" title="Mostrar/ocultar filtros">Filtros ▴</button>
+                        </div>
+                        <div id="div-item-filter" class="filters-panel collapsed">
+                            <div class="filters-toolbar">
+                                <div class="date-input-wrap">
+                                    <input id="searchItem" type="text" placeholder="Filtrar">
+                                    <button type="button" class="date-clear-btn" id="searchItemClear" title="Limpar filtro">&#10005;</button>
+                                </div>
+                                <label class="filter-check" title="Mostrar todos os itens (ignora os demais filtros)">
+                                    <input type="checkbox" id="f-all"><span class="iff-gutter"><span class="iff-knob"></span></span> Todos
+                                </label>
+                            </div>
+                            <div id="filters-groups" class="filters-groups">
+                                <fieldset id="fg-status">
+                                    <legend>Estado</legend>
+                                    <label class="filter-check"><input type="checkbox" id="f-new"><span class="iff-gutter"><span class="iff-knob"></span></span> Novos</label>
+                                    <label class="filter-check"><input type="checkbox" id="f-modified"><span class="iff-gutter"><span class="iff-knob"></span></span> Modificados</label>
+                                    <label class="filter-check"><input type="checkbox" id="f-deleted"><span class="iff-gutter"><span class="iff-knob"></span></span> Deletados</label>
+                                    <label class="filter-check"><input type="checkbox" id="f-hidden"><span class="iff-gutter"><span class="iff-knob"></span></span> Ocultos</label>
+                                    <label class="filter-check"><input type="checkbox" id="f-encoding"><span class="iff-gutter"><span class="iff-knob"></span></span> Aviso</label>
+                                </fieldset>
+                                <fieldset id="fg-active">
+                                    <legend>Atividade</legend>
+                                    <label class="filter-check" title="Checado = ativos; deschecado = desativados; meio = sem filtro">
+                                        <span class="filter-tri-name">Ativos</span>
+                                        <span class="tri-toggle" id="tri-active"></span>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-fs-type">
+                                    <legend>flag_shop type</legend>
+                                </fieldset>
+                                <fieldset id="fg-fs-icon">
+                                    <legend>flag_shop icon</legend>
+                                </fieldset>
+                                <fieldset id="fg-base">
+                                    <legend>Base</legend>
+                                    <label class="filter-check" title="Checado = time_shop ativo; deschecado = sem time_shop; meio = sem filtro">
+                                        <span class="filter-tri-name">time_shop</span>
+                                        <span class="tri-toggle" id="tri-time-shop"></span>
+                                    </label>
+                                    <label class="filter-check">Período
+                                        <div class="filter-row">
+                                            <select id="f-base-period-op" title="Comparador do período" class="f-level-select">
+                                                <option value="">&#8212;</option>
+                                                <option value="eq">=</option>
+                                                <option value="ne">&#8800;</option>
+                                                <option value="lt">&lt;</option>
+                                                <option value="le">&le;</option>
+                                                <option value="gt">&gt;</option>
+                                                <option value="ge">&ge;</option>
+                                            </select>
+                                            <input type="number" id="f-base-period" class="filter-num-input" placeholder="Período" title="Período do time_shop (igual ao campo do layout, sem enum)">
+                                        </div>
+                                    </label>
+                                    <label class="filter-check" title="Checado = tem desconto (shop.sale_price > 0); deschecado = sem desconto; meio = sem filtro">
+                                        <span class="filter-tri-name">tem desconto</span>
+                                        <span class="tri-toggle" id="tri-base-discount"></span>
+                                    </label>
+                                    <label class="filter-check">Preço
+                                        <div class="filter-row">
+                                            <select id="f-base-price-op" title="Comparador do preço" class="f-level-select">
+                                                <option value="">&#8212;</option>
+                                                <option value="eq">=</option>
+                                                <option value="ne">&#8800;</option>
+                                                <option value="lt">&lt;</option>
+                                                <option value="le">&le;</option>
+                                                <option value="gt">&gt;</option>
+                                                <option value="ge">&ge;</option>
+                                            </select>
+                                            <input type="number" id="f-base-price" class="filter-num-input" placeholder="Preço" title="Preço (shop.price)">
+                                        </div>
+                                    </label>
+                                    <label class="filter-check">Preço de venda
+                                        <div class="filter-row">
+                                            <select id="f-base-sale-price-op" title="Comparador do preço de venda" class="f-level-select">
+                                                <option value="">&#8212;</option>
+                                                <option value="eq">=</option>
+                                                <option value="ne">&#8800;</option>
+                                                <option value="lt">&lt;</option>
+                                                <option value="le">&le;</option>
+                                                <option value="gt">&gt;</option>
+                                                <option value="ge">&ge;</option>
+                                            </select>
+                                            <input type="number" id="f-base-sale-price" class="filter-num-input" placeholder="Preço de venda" title="Preço de venda (shop.sale_price)">
+                                        </div>
+                                    </label>
+                                    <label class="filter-check" title="Checado = data válida; deschecado = data vazia; meio = sem filtro">
+                                        <span class="filter-tri-name">data ativa</span>
+                                        <span class="tri-toggle" id="tri-active-date"></span>
+                                    </label>
+                                 </fieldset>
+                                <fieldset id="fg-level">
+                                    <legend>Level</legend>
+                                    <label class="filter-check" title="Checado = is_max; deschecado = sem is_max; meio = sem filtro">
+                                        <span class="filter-tri-name">is_max</span>
+                                        <span class="tri-toggle" id="tri-level-max"></span>
+                                    </label>
+                                    <div class="filter-row">
+                                        <select id="f-level-op" title="Comparador do nível" class="f-level-select">
+                                            <option value="">&#8212;</option>
+                                            <option value="eq">=</option>
+                                            <option value="ne">&#8800;</option>
+                                            <option value="lt">&lt;</option>
+                                            <option value="le">&le;</option>
+                                            <option value="gt">&gt;</option>
+                                            <option value="ge">&ge;</option>
+                                        </select>
+                                        <select id="f-level-value" title="Nível" class="f-level-select"></select>
+                                    </div>
+                                </fieldset>
+<fieldset id="fg-part">
+                                    <legend>Part.iff</legend>
+                                    <label class="filter-check" title="Checado = iniciantes; deschecado = demais; meio = sem filtro">
+                                        <span class="filter-tri-name">Iniciantes</span>
+                                        <span class="tri-toggle" id="tri-beginners"></span>
+                                    </label>
+                                    <label class="filter-check">Tipo
+                                        <select id="f-type-item" title="Filtrar por type_item (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">Slot
+                                        <select id="f-part-slot" title="Filtrar pelo slot do char_part_num no typeid (0-23)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">sub_type
+                                        <select id="f-part-subtype" title="Filtrar pelo char_sub_type_num no typeid (casa por bit; REPLACE = valor 0)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">Character
+                                        <select id="f-part-character" title="Filtrar pelo character do typeid (bit char_identity)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check" title="Checado = tem equipable_with (texto não vazio); meio = sem filtro">
+                                        <span class="filter-tri-name">equipable_with</span>
+                                        <span class="tri-toggle" id="tri-part-equipable"></span>
+                                    </label>
+                                    <label class="filter-check" title="Checado = tem sub_part (algum slot != 0); meio = sem filtro">
+                                        <span class="filter-tri-name">sub_part</span>
+                                        <span class="tri-toggle" id="tri-part-subpart"></span>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-club">
+                                    <legend>Club.iff</legend>
+                                    <label class="filter-check">Tipo
+                                        <select id="f-tipo" title="Filtrar por tipo do taco (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-ws">
+                                    <legend>work_shop</legend>
+                                    <label class="filter-check">Tipo
+                                        <select id="f-ws-tipo" title="Filtrar por tipo do work_shop (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">rank_s_stat
+                                        <select id="f-ws-rank-s-stat" title="Filtrar por rank_s_stat (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">tipo_rank_s
+                                        <select id="f-ws-tipo-rank-s" title="Filtrar por tipo_rank_s (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check" title="Checado = pode transformar; deschecado = não; meio = sem filtro">
+                                        <span class="filter-tri-name">can_transform</span>
+                                        <span class="tri-toggle" id="tri-ws-can-transform"></span>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-cadie">
+                                    <legend>CadieMagicBox.iff</legend>
+                                    <label class="filter-check">Setor
+                                        <select id="f-cadie-setor" title="Filtrar por setor do CadieMagicBox (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">Character
+                                        <select id="f-cadiebox-character" title="Filtrar por character do CadieMagicBox (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-ball">
+                                    <legend>Ball.iff</legend>
+                                    <label class="filter-check">Consumable
+                                        <select id="f-consumable-type" title="Filtrar por consumable_type (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-caddie">
+                                    <legend>Caddie.iff</legend>
+                                    <label class="filter-check" title="Eterno = valor_mensal 0; Mensal = valor_mensal != 0; meio = sem filtro">
+                                        <span class="filter-tri-name">valor_mensal</span>
+                                        <span class="tri-toggle" id="tri-valor-mensal"></span>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-caddieitem">
+                                    <legend>CaddieItem.iff</legend>
+                                    <label class="filter-check">Caddie
+                                        <select id="f-caddieitem-caddie" title="Filtrar por Caddie">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-item">
+                                    <legend>Item.iff</legend>
+                                    <label class="filter-check" title="Checado = passivo; deschecado = não passivo; meio = sem filtro">
+                                        <span class="filter-tri-name">passivo</span>
+                                        <span class="tri-toggle" id="tri-item-passive"></span>
+                                    </label>
+                                    <label class="filter-check">Tipo item
+                                        <select id="f-item-type" title="Filtrar por item_type do typeid (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">Tipo
+                                        <select id="f-item-tipo" title="Filtrar por tipo_item (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-setitem">
+                                    <legend>SetItem.iff</legend>
+                                    <label class="filter-check">sub_type
+                                        <select id="f-setitem-sub" title="Filtrar por set_item_sub_type do typeid (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">sub_type_char
+                                        <select id="f-setitem-sub-char" title="Filtrar por set_item_sub_type_char do typeid (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-match">
+                                    <legend>Match.iff</legend>
+                                    <label class="filter-check">match_special
+                                        <select id="f-match-special" title="Filtrar por match_special do typeid (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-skin">
+                                    <legend>Skin.iff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-skin-type" title="Filtrar por type do typeid (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-furniture">
+                                    <legend>Furniture.iff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-furniture-type" title="Filtrar por type do typeid (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-enchant">
+                                    <legend>Enchant.iff</legend>
+                                    <label class="filter-check">stats_type
+                                        <select id="f-enchant-stats" title="Filtrar por stats_type do typeid (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-achievement">
+                                    <legend>Achievement.iff</legend>
+                                    <label class="filter-check">class
+                                        <select id="f-achievement-class" title="Filtrar por class do typeid (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-counteritem">
+                                    <legend>CounterItem.iff</legend>
+                                    <label class="filter-check">is_achievement_point
+                                        <select id="f-counteritem-point" title="Filtrar por is_achievement_point do typeid (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-auxpart">
+                                    <legend>AuxPart.iff</legend>
+                                    <label class="filter-check" title="Checado = infinity; deschecado = finito; meio = sem filtro">
+                                        <span class="filter-tri-name">is_infinity</span>
+                                        <span class="tri-toggle" id="tri-aux-infinity"></span>
+                                    </label>
+                                    <label class="filter-check" title="Checado = mão esquerda; deschecado = mão direita; meio = sem filtro">
+                                        <span class="filter-tri-name">is_left_hand</span>
+                                        <span class="tri-toggle" id="tri-aux-left-hand"></span>
+                                    </label>
+                                    <label class="filter-check" title="Tem power_drive (efeito.power_drive != 0)">
+                                        <span class="filter-tri-name">power_drive</span>
+                                        <span class="tri-toggle" id="tri-aux-power-drive"></span>
+                                    </label>
+                                    <label class="filter-check" title="Tem drop_rate (efeito.drop_rate != 0)">
+                                        <span class="filter-tri-name">drop_rate</span>
+                                        <span class="tri-toggle" id="tri-aux-drop-rate"></span>
+                                    </label>
+                                    <label class="filter-check" title="Tem power_gauge (efeito.power_gauge != 0)">
+                                        <span class="filter-tri-name">power_gauge</span>
+                                        <span class="tri-toggle" id="tri-aux-power-gauge"></span>
+                                    </label>
+                                    <label class="filter-check" title="Tem pang_rate (efeito.pang_rate != 0)">
+                                        <span class="filter-tri-name">pang_rate</span>
+                                        <span class="tri-toggle" id="tri-aux-pang-rate"></span>
+                                    </label>
+                                    <label class="filter-check" title="Tem exp_rate (efeito.exp_rate != 0)">
+                                        <span class="filter-tri-name">exp_rate</span>
+                                        <span class="tri-toggle" id="tri-aux-exp-rate"></span>
+                                    </label>
+                                    <label class="filter-check" title="Tem link_power_drive (efeito.link_power_drive != 0)">
+                                        <span class="filter-tri-name">link_power_drive</span>
+                                        <span class="tri-toggle" id="tri-aux-link-power-drive"></span>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-queststuff">
+                                    <legend>QuestStuff.iff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-queststuff-type" title="Filtrar por type do typeid (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-questitem">
+                                    <legend>QuestItem.iff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-questitem-type" title="Filtrar por type do typeid (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">type campo
+                                        <select id="f-questitem-field-type" title="Filtrar por type do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-timeitem">
+                                    <legend>TimeLimitItem.iff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-timeitem-type" title="Filtrar por type do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-caddievoice">
+                                    <legend>CaddieVoiceTable.iff</legend>
+                                    <label class="filter-check">level
+                                        <select id="f-caddievoice-level" title="Filtrar por level do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-memorialcoin">
+                                    <legend>MemorialShopCoinItem.sff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-memorialcoin-type" title="Filtrar por type do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">filter_type
+                                        <select id="f-memorialcoin-filter" title="Filtrar por filter_type — casa se QUALQUER slot do array tem o valor; NONE = item sem nenhum filter_type">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">Gacha num
+                                        <div class="filter-row">
+                                            <select id="f-memorialcoin-gacha-op" title="Comparador do gacha num" class="f-level-select">
+                                                <option value="">&#8212;</option>
+                                                <option value="eq">=</option>
+                                                <option value="ne">&#8800;</option>
+                                                <option value="lt">&lt;</option>
+                                                <option value="le">&le;</option>
+                                                <option value="gt">&gt;</option>
+                                                <option value="ge">&ge;</option>
+                                            </select>
+                                            <input type="number" id="f-memorialcoin-gacha-num" class="filter-num-input" placeholder="Gacha num" title="Compara com gacha_range.number_min e number_max">
+                                        </div>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-memorialrare">
+                                    <legend>MemorialShopRareItem.iff</legend>
+                                    <label class="filter-check">rare_type
+                                        <select id="f-memorialrare-rare-type" title="Filtrar por rare_type do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">filter_type
+                                        <select id="f-memorialrare-filter" title="Filtrar por filter_type — casa se QUALQUER slot do array tem o valor; NONE = item sem nenhum filter_type">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">Gacha num
+                                        <div class="filter-row">
+                                            <select id="f-memorialrare-gacha-op" title="Comparador do gacha num" class="f-level-select">
+                                                <option value="">&#8212;</option>
+                                                <option value="eq">=</option>
+                                                <option value="ne">&#8800;</option>
+                                                <option value="lt">&lt;</option>
+                                                <option value="le">&le;</option>
+                                                <option value="gt">&gt;</option>
+                                                <option value="ge">&ge;</option>
+                                            </select>
+                                            <input type="number" id="f-memorialrare-gacha-num" class="filter-num-input" placeholder="Gacha num" title="Compara com gacha.number">
+                                        </div>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-charmastery">
+                                    <legend>CharacterMastery.iff</legend>
+                                    <label class="filter-check">seq
+                                        <select id="f-charmastery-seq" title="Filtrar por seq do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">stats
+                                        <select id="f-charmastery-stats" title="Filtrar por stats do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">level
+                                        <div class="filter-row">
+                                            <select id="f-charmastery-level-op" title="Comparador do level" class="f-level-select">
+                                                <option value="">&#8212;</option>
+                                                <option value="eq">=</option>
+                                                <option value="ne">&#8800;</option>
+                                                <option value="lt">&lt;</option>
+                                                <option value="le">&le;</option>
+                                                <option value="gt">&gt;</option>
+                                                <option value="ge">&ge;</option>
+                                            </select>
+                                            <select id="f-charmastery-level" title="Level (enum enLEVEL)">
+                                                <option value="">&#8212;</option>
+                                            </select>
+                                        </div>
+                                    </label>
+                                    <label class="filter-check">character
+                                        <select id="f-charmastery-character" title="Filtrar por character (typeid do item igual ao do character escolhido)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-specialprize">
+                                    <legend>SpecialPrizeItem.iff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-specialprize-type" title="Filtrar por type do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-shoplimit">
+                                    <legend>ShopLimitItem.iff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-shoplimit-type" title="Filtrar por type do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-pointshop">
+                                    <legend>PointShop.iff</legend>
+                                    <label class="filter-check">rarity
+                                        <select id="f-pointshop-rarity" title="Filtrar por rarity do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-nonvisibleitem">
+                                    <legend>NonVisibleItemTable.iff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-nonvisibleitem-type" title="Filtrar por type do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-artifactmana">
+                                    <legend>ArtifactManaInfo.iff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-artifactmana-type" title="Filtrar por type do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-subscriptionitem">
+                                    <legend>SubscriptionItemTable.iff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-subscriptionitem-type" title="Filtrar por type do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-twinsitem">
+                                    <legend>TwinsItemTable.iff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-twinsitem-type" title="Filtrar por type do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-levelup">
+                                    <legend>LevelUpPrizeItem.iff</legend>
+                                    <label class="filter-check">level
+                                        <select id="f-levelup-level" title="Filtrar por level do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-errorcodeinfo">
+                                    <legend>ErrorCodeInfo.iff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-errorcodeinfo-type" title="Filtrar por type do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-ability">
+                                    <legend>Ability.iff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-ability-type" title="Filtrar por type do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">efeito.type
+                                        <select id="f-ability-effect" title="Filtrar por efeito.type (qualquer slot do array)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-seteffect">
+                                    <legend>SetEffectTable.iff</legend>
+                                    <label class="filter-check">effect.effect
+                                        <select id="f-seteffect-effect" title="Filtrar por effect.effect (qualquer slot do array)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">effect.type
+                                        <select id="f-seteffect-type" title="Filtrar por effect.type (qualquer slot do array)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-clubsetwsprob">
+                                    <legend>ClubSetWorkShopLevelUpProb.iff</legend>
+                                    <label class="filter-check">tipo
+                                        <select id="f-clubsetwsprob-tipo" title="Filtrar por tipo do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-clubsetlimit">
+                                    <legend>ClubSetWorkShopLevelUpLimit.iff</legend>
+                                    <label class="filter-check">tipo
+                                        <select id="f-clubsetlimit-tipo" title="Filtrar por tipo do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">rank
+                                        <select id="f-clubsetlimit-rank" title="Filtrar por rank do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-clubsetrankupexp">
+                                    <legend>ClubSetWorkShopRankUpExp.iff</legend>
+                                    <label class="filter-check">tipo
+                                        <select id="f-clubsetrankupexp-tipo" title="Filtrar por tipo do campo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-card">
+                                    <legend>Card.iff</legend>
+                                    <label class="filter-check">type
+                                        <select id="f-card-type" title="Filtrar por type do typeid (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">tipo
+                                        <select id="f-card-tipo" title="Filtrar por raridade do campo tipo (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">volume
+                                        <select id="f-card-volume" title="Filtrar por volume do pacote (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                    <label class="filter-check">efeito.type
+                                        <select id="f-card-efeito" title="Filtrar por efeito.type (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-hair">
+                                    <legend>HairStyle.iff</legend>
+                                    <label class="filter-check">Character
+                                        <select id="f-hair-character" title="Filtrar por character do HairStyle (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-cutin">
+                                    <legend>CutinInfomation.iff</legend>
+                                    <label class="filter-check">Character
+                                        <select id="f-cutin-character" title="Filtrar por character do CutinInfomation (igual)">
+                                            <option value="">&#8212;</option>
+                                        </select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-mascot">
+                                    <legend>Mascot.iff</legend>
+                                    <label class="filter-check" title="Checado = msg ativa; deschecado = msg desativada; meio = sem filtro">
+                                        <span class="filter-tri-name">msg.active</span>
+                                        <span class="tri-toggle" id="tri-mascot-msg-active"></span>
+                                    </label>
+                                    <label class="filter-check" title="Tem power_drive (efeito.power_drive != 0)">
+                                        <span class="filter-tri-name">power_drive</span>
+                                        <span class="tri-toggle" id="tri-mascot-power-drive"></span>
+                                    </label>
+                                    <label class="filter-check" title="Tem drop_rate (efeito.drop_rate != 0)">
+                                        <span class="filter-tri-name">drop_rate</span>
+                                        <span class="tri-toggle" id="tri-mascot-drop-rate"></span>
+                                    </label>
+                                    <label class="filter-check" title="Tem power_gauge (efeito.power_gauge != 0)">
+                                        <span class="filter-tri-name">power_gauge</span>
+                                        <span class="tri-toggle" id="tri-mascot-power-gauge"></span>
+                                    </label>
+                                    <label class="filter-check" title="Tem exp_rate (efeito.exp_rate != 0)">
+                                        <span class="filter-tri-name">exp_rate</span>
+                                        <span class="tri-toggle" id="tri-mascot-exp-rate"></span>
+                                    </label>
+                                    <label class="filter-check" title="Tem item_slot (efeito.item_slot != 0)">
+                                        <span class="filter-tri-name">item_slot</span>
+                                        <span class="tri-toggle" id="tri-mascot-item-slot"></span>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-grandprix">
+                                    <legend>GrandPrixData.iff</legend>
+                                    <label class="filter-check" title="gp_event (bit do typeid)">
+                                        <span class="filter-tri-name">gp_event</span>
+                                        <span class="tri-toggle" id="tri-grandprix-gp-event"></span>
+                                    </label>
+                                    <label class="filter-check" title="type (campo — GrandPrixDataType)">
+                                        <span class="filter-tri-name">type (campo)</span>
+                                        <select id="f-grandprix-type"><option value="">&#8212;</option></select>
+                                    </label>
+                                    <label class="filter-check" title="Aba (gp_class — bit do typeid)">
+                                        <span class="filter-tri-name">Aba (gp_class)</span>
+                                        <select id="f-grandprix-gp-class"><option value="">&#8212;</option></select>
+                                    </label>
+                                    <label class="filter-check" title="class (campo — GrandPrixDataClass)">
+                                        <span class="filter-tri-name">class (campo)</span>
+                                        <select id="f-grandprix-class"><option value="">&#8212;</option></select>
+                                    </label>
+                                    <label class="filter-check" title="Tem rule (rule != 0)">
+                                        <span class="filter-tri-name">Tem rule</span>
+                                        <span class="tri-toggle" id="tri-grandprix-rule"></span>
+                                    </label>
+                                    <label class="filter-check" title="natural (flag.natural != 0)">
+                                        <span class="filter-tri-name">Is natural</span>
+                                        <span class="tri-toggle" id="tri-grandprix-natural"></span>
+                                    </label>
+                                    <label class="filter-check" title="short_game (flag.short_game != 0)">
+                                        <span class="filter-tri-name">Is short_game</span>
+                                        <span class="tri-toggle" id="tri-grandprix-short"></span>
+                                    </label>
+                                    <label class="filter-check" title="hole_cup_x2 (flag.hole_cup_x2 != 0)">
+                                        <span class="filter-tri-name">Is hole_cup_x2</span>
+                                        <span class="tri-toggle" id="tri-grandprix-holecup"></span>
+                                    </label>
+                                    <label class="filter-check" title="Algum slot do array condition != 0">
+                                        <span class="filter-tri-name">Tem condition</span>
+                                        <span class="tri-toggle" id="tri-grandprix-condition"></span>
+                                    </label>
+                                    <label class="filter-check" title="ticket.typeid != 0">
+                                        <span class="filter-tri-name">Tem ticket</span>
+                                        <span class="tri-toggle" id="tri-grandprix-ticket"></span>
+                                    </label>
+                                    <label class="filter-check" title="need_gp_clear — clear_gp_typeid != 0 ou lock_yn == true">
+                                        <span class="filter-tri-name">need_gp_clear</span>
+                                        <span class="tri-toggle" id="tri-grandprix-gp-clear"></span>
+                                    </label>
+                                    <label class="filter-check" title="Course (num do Course.iff; label `num — nome`)">
+                                        <span class="filter-tri-name">Course</span>
+                                        <select id="f-grandprix-course"><option value="">&#8212;</option></select>
+                                    </label>
+                                    <label class="filter-check" title="Modo (course_info.modo)">
+                                        <span class="filter-tri-name">Modo</span>
+                                        <select id="f-grandprix-modo"><option value="">&#8212;</option></select>
+                                    </label>
+                                    <label class="filter-check" title="Nível (level_min e level_max, enum enLEVEL)">
+                                        <span class="filter-tri-name">Nível</span>
+                                        <select id="f-grandprix-level-op" title="Comparador do nível" class="f-level-select">
+                                            <option value="">&#8212;</option>
+                                            <option value="eq">=</option>
+                                            <option value="ne">&#8800;</option>
+                                            <option value="lt">&lt;</option>
+                                            <option value="le">&le;</option>
+                                            <option value="gt">&gt;</option>
+                                            <option value="ge">&ge;</option>
+                                        </select>
+                                        <select id="f-grandprix-level" title="Nível" class="f-level-select"><option value="">&#8212;</option></select>
+                                    </label>
+                                    <label class="filter-check" title="Hora (open/start/end) — casa se QUALQUER um dos horários (h:m:s) bater">
+                                        <span class="filter-tri-name">Hora (open/start/end)</span>
+                                        <div id="f-grandprix-time-wrap"></div>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-gpspecialhole">
+                                    <legend>GrandPrixSpecialHole.iff</legend>
+                                    <label class="filter-check" title="Course (num do Course.iff; 127 = RANDOM)">
+                                        <span class="filter-tri-name">Course</span>
+                                        <select id="f-gpspecialhole-course"><option value="">&#8212;</option></select>
+                                    </label>
+                                    <label class="filter-check" title="Hole (enum HOLE_1..18)">
+                                        <span class="filter-tri-name">Hole</span>
+                                        <select id="f-gpspecialhole-hole"><option value="">&#8212;</option></select>
+                                    </label>
+                                    <label class="filter-check" title="Seq (enum SEQ_1..18)">
+                                        <span class="filter-tri-name">Seq</span>
+                                        <select id="f-gpspecialhole-seq"><option value="">&#8212;</option></select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-gprrank">
+                                    <legend>GrandPrixRankReward.iff</legend>
+                                    <label class="filter-check" title="Rank (enum RANK_1..100)">
+                                        <span class="filter-tri-name">Rank</span>
+                                        <select id="f-gprrank-rank"><option value="">&#8212;</option></select>
+                                    </label>
+                                    <label class="filter-check" title="Tem troféu (trophy_typeid != 0)">
+                                        <span class="filter-tri-name">Tem trophy</span>
+                                        <span class="tri-toggle" id="tri-gprrank-trophy"></span>
+                                    </label>
+                                    <label class="filter-check" title="Troféu (trophy_typeid igual — itens GRAND_PRIX do Match.iff)">
+                                        <span class="filter-tri-name">Troféu</span>
+                                        <select id="f-gprrank-trophy-sel"><option value="">&#8212;</option></select>
+                                    </label>
+                                </fieldset>
+                                <fieldset id="fg-gpaio">
+                                    <legend>GrandPrixAIOptionalData.sff</legend>
+                                    <label class="filter-check" title="Character (char_id igual — ids do Character.iff)">
+                                        <span class="filter-tri-name">Character</span>
+                                        <select id="f-gpaio-char"><option value="">&#8212;</option></select>
+                                    </label>
+                                    <label class="filter-check" title="class (enum GP_CLASS_NONE..9)">
+                                        <span class="filter-tri-name">class</span>
+                                        <select id="f-gpaio-class"><option value="">&#8212;</option></select>
+                                    </label>
+                                </fieldset>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="div-geral-info" class="flex flex-1 flex-col overflow-auto"></div>
+            </div>
+            <ul id="ul-item-context-menu" class="context-menu flex-col p-1.25 shadow-lg">
+                <li id="li-item-new">Novo</li>
+                <li id="li-item-goto">Ir para o item</li>
+                <li id="li-item-dup">Duplicar</li>
+                <li id="li-item-del">Remover</li>
+                <li id="li-item-undo-del">Restaurar</li>
+                <li id="li-item-revert">Reverter alterações</li>
+                <li id="li-item-hide">Esconder</li>
+                <li id="li-item-unhide">Desocultar</li>
+                <li id="li-item-show">Mostra todos</li>
+            </ul>
+            <footer class="app-footer">
+                <span>&copy; <a href="https://github.com/Acrisio-Filho" target="_blank" rel="noopener">Acrisio Filho</a>. Todos os direitos reservados.</span>
+                <span class="app-footer-note">Melhorias no projeto feitas com LLMs gratuitas (<a href="https://opencode.ai" target="_blank" rel="noopener">OpenCode</a>).</span>
+                <span class="app-footer-note"><a href="https://github.com/Acrisio-Filho/JS-IFF-Manager/blob/main/LICENSE" target="_blank" rel="noopener">Licenciado sob a Licença MIT</a>.</span>
+            </footer>
+        </div>
+        <div id="div-loading" class="loading-overlay" hidden>
+            <div class="loading-box">
+                <div class="loading-title">Carregando arquivos...</div>
+                <div id="loading-progress" class="loading-progress" hidden>
+                    <div id="loading-progress-fill" class="loading-progress-fill"></div>
+                    <span id="loading-progress-text" class="loading-progress-text"></span>
+                </div>
+                <div id="loading-files" class="loading-files"></div>
+            </div>
+        </div>
+    </body>
+</html>
