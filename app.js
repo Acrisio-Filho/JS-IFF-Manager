@@ -332,6 +332,7 @@ function idbRenameRecent(_oldName, _encoding, _hash, _newName) {
                     encoding: rec.encoding,
                     blob: rec.blob,
                     hash: rec.hash,
+                    versao: rec.versao,
                     saved_at: rec.saved_at
                 });
 
@@ -2435,6 +2436,7 @@ function makeItemContextMenuUl(evt) {
     const menu = document.getElementById('ul-item-context-menu');
     const itemNew = document.getElementById('li-item-new');
     const itemShow = document.getElementById('li-item-show');
+    const itemPaste = document.getElementById('li-item-paste');
 
     document.getElementById('li-item-goto').style.display = 'none';
 
@@ -2444,12 +2446,15 @@ function makeItemContextMenuUl(evt) {
     document.getElementById('li-item-revert').style.display = 'none';
     document.getElementById('li-item-hide').style.display = 'none';
     document.getElementById('li-item-unhide').style.display = 'none';
+    document.getElementById('li-item-copy').style.display = 'none';
 
     itemNew.style.display = 'inherit';
     itemShow.style.display = 'inherit';
+    itemPaste.style.display = 'inherit';
 
     itemNew.addEventListener('click', newItem);
     itemShow.addEventListener('click', showItem);
+    itemPaste.addEventListener('click', pasteItem);
 
     menu.style.display = 'flex';
 
@@ -2480,9 +2485,13 @@ function makeItemContextMenu(evt) {
     const itemHide = document.getElementById('li-item-hide');
     const itemUnhide = document.getElementById('li-item-unhide');
     const itemShow = document.getElementById('li-item-show');
+    const itemCopy = document.getElementById('li-item-copy');
+    const itemPaste = document.getElementById('li-item-paste');
 
     itemNew.style.display = 'inherit';
     itemDup.style.display = 'inherit';
+    itemCopy.style.display = 'inherit';
+    itemPaste.style.display = 'inherit';
 
     itemDup['index'] = li.index;
     itemDup['itemObj'] = li.itemObj;
@@ -2490,6 +2499,10 @@ function makeItemContextMenu(evt) {
     itemNew.addEventListener('click', newItem);
     itemDup.addEventListener('click', duplicateItem);
     itemShow.addEventListener('click', showItem);
+
+    itemCopy['itemObj'] = li.itemObj;
+    itemCopy.addEventListener('click', copyItem);
+    itemPaste.addEventListener('click', pasteItem);
 
     // "Ir para o item": iff cujo elemento tem o MESMO typeid (ex.: Desc —
     // cada entrada descreve um item de outro IFF). Só aparece quando existe
@@ -2690,6 +2703,325 @@ function duplicateItem(evt) {
     makeItemSelection(true);
     selectItem(new_item);
     updateSelectedIFFOption();
+}
+
+function getItemCtorForRegion(_iffName, _region) {
+    const vars =
+        kIffRegionVariants[_iffName];
+
+    const v =
+        vars && vars.find(x => x.region === _region);
+
+    return v ? v.ctor : getConstructorByName(_iffName);
+}
+
+async function copyItem(evt) {
+    const iff =
+        getSelectedIFF();
+
+    const item =
+        evt.target.itemObj;
+
+    if (!iff || !item || !item.typeid) {
+        await new AlertModal('Não há item selecionado para copiar.').show();
+        return;
+    }
+
+    const srcRegion =
+        getVersaoPackRegiao();
+
+    const savedUpload =
+        kCodePage.upload;
+
+    kCodePage.upload =
+        'utf8';
+
+    const wb =
+        new WriterBuffer(item.getSize());
+
+    item.serialize(wb);
+
+    kCodePage.upload =
+        savedUpload;
+
+    const payload =
+        {
+            app: 'jsiffmanager',
+            kind: 'item',
+            versao: srcRegion,
+            iff: iff.name,
+            data: Array.from(wb.data)
+        };
+
+    const json =
+        JSON.stringify(payload);
+
+    if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+        await new AlertModal('Não há suporte para copiar para a área de transferência neste navegador.').show();
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(json);
+
+        await new AlertModal('O item [' + getVersaoLabelPorRegiao(srcRegion) + '/' + iff.name
+            + ']: "' + item.getIdentifyName() + '" foi copiado para a área de transferência.').show();
+    } catch (e) {
+        await new AlertModal('Erro ao copiar para a área de transferência: '
+            + (e && e.message ? e.message : e)).show();
+    }
+}
+
+async function pasteItem(evt) {
+    const iff =
+        getSelectedIFF();
+
+    if (!iff) {
+        await new AlertModal('Nenhum IFF carregado para colar o item.').show();
+        return;
+    }
+
+    if (!navigator.clipboard || typeof navigator.clipboard.readText !== 'function') {
+        await new AlertModal('Não há suporte para colar da área de transferência neste navegador.').show();
+        return;
+    }
+
+    let json;
+
+    try {
+        json =
+            await navigator.clipboard.readText();
+    } catch (e) {
+        await new AlertModal('Erro ao ler a área de transferência: '
+            + (e && e.message ? e.message : e)).show();
+        return;
+    }
+
+    let payload;
+
+    try {
+        payload =
+            JSON.parse(json);
+    } catch (e) {
+        await new AlertModal('Formato inválido: o conteúdo da área de transferência não é um JSON válido.').show();
+        return;
+    }
+
+    if (!payload || payload.app !== 'jsiffmanager' || payload.kind !== 'item'
+            || typeof payload.versao !== 'string' || typeof payload.iff !== 'string'
+            || !Array.isArray(payload.data)) {
+        await new AlertModal('Formato inválido: não é um item do jsiffmanager copiado da área de transferência.').show();
+        return;
+    }
+
+    // o item copiado pertence ao IFF nomeado no payload; se o IFF aberto for
+    // outro, usa o IFF de destino (caso esteja carregado). A troca da seleção
+    // de IFF na UI só acontece DEPOIS que a cola foi aplicada com sucesso — se
+    // der erro antes, o usuário fica no IFF em que estava mexendo.
+    let targetIff =
+        iff;
+
+    if (iff.name !== payload.iff) {
+        const dest =
+            iffs.find(i => i.name === payload.iff);
+
+        if (!dest) {
+            await new AlertModal('O IFF ' + payload.iff
+                + ' (de onde o item foi copiado) não está carregado.').show();
+            return;
+        }
+
+        targetIff =
+            dest;
+    }
+
+    const srcRegion =
+        payload.versao;
+
+    const tgtRegion =
+        getVersaoPackRegiao();
+
+    const srcCtor =
+        getItemCtorForRegion(payload.iff, srcRegion);
+
+    const tgtCtor =
+        targetIff.__regionCtor || targetIff.element_constructor;
+
+    if (!srcCtor || !tgtCtor) {
+        await new AlertModal('Não foi possível encontrar o construtor do item para a versão '
+            + srcRegion + '.').show();
+        return;
+    }
+
+    let el;
+
+    const savedLoad =
+        kCodePage.load;
+
+    const prevRegion =
+        gRegionApply;
+
+    // o layout de campos dependentes de região (ex.: flag_shop do TH) é decidido
+    // em tempo de construção via isTHRegionActive()/gRegionApply — precisa bater
+    // com a região de origem para reconstruir o item copiado corretamente
+    gRegionApply =
+        srcRegion;
+
+    kCodePage.load =
+        'utf8';
+
+    try {
+        el =
+            new srcCtor(ReaderBuffer.from(new Uint8Array(payload.data)));
+    } catch (e) {
+        kCodePage.load =
+            savedLoad;
+
+        gRegionApply =
+            prevRegion;
+
+        await new AlertModal('Erro ao reconstruir o item da área de transferência: '
+            + (e && e.message ? e.message : e)).show();
+        return;
+    }
+
+    kCodePage.load =
+        savedLoad;
+
+    // conversão de região (item único)
+    let nd =
+        el;
+
+    let converted =
+        false;
+
+    if (srcRegion !== tgtRegion) {
+        // o elemento de destino também precisa ser construído com a região-alvo
+        // ativa, senão seus campos dependentes de região nascem no layout errado
+        gRegionApply =
+            tgtRegion;
+
+        try {
+            nd =
+                new tgtCtor();
+        } finally {
+            gRegionApply =
+                prevRegion;
+        }
+
+        _converteCopiaCampos(nd, el);
+
+        if (nd.shop && el.shop && nd.shop.flag_shop && el.shop.flag_shop)
+            _converteFlagShopBits(nd.shop.flag_shop, el.shop.flag_shop);
+
+        // o item convertido é NOVO para o pack de destino (não é uma modificação
+        // de um item existente), então nasce como __new — o __modified só existe
+        // quando se altera um item que já pertence ao pack
+        nd.__new =
+            true;
+
+        converted =
+            true;
+    } else {
+        gRegionApply =
+            prevRegion;
+    }
+
+    const isUnique =
+        !(targetIff.element_constructor.isTypeidUnique
+            && targetIff.element_constructor.isTypeidUnique() === false);
+
+    const existing =
+        targetIff.elements.find(e => !e.__deleted && !e.__deleted2
+            && e.typeid && e.typeid.value === nd.typeid.value);
+
+    if ((isUnique && !existing) || !isUnique) {
+        // adiciona novo item (desc/cutin auto por flag_ligacao)
+        let idx =
+            targetIff.elements.findIndex(i => nd.typeid.value < i.typeid.value);
+
+        targetIff.elements.splice(idx == -1 ? targetIff.elements.length : idx, 0, nd);
+
+        nd.__new = true;
+
+        nd.saveState();
+
+        ensureItemDescription(nd);
+        ensureCutinInfomation(nd);
+
+        if (targetIff.element_constructor === CadieMagicBox)
+            targetIff.rebuildCadieMagicBox();
+
+        // só agora (tudo certo) troca a seleção de IFF na UI, se necessário
+        if (getSelectedIFF().name !== targetIff.name) {
+            const sel =
+                document.getElementById('iff-sel');
+
+            setSelectValue(sel, targetIff.name);
+            sel.dispatchEvent(new Event('change'));
+        }
+
+        makeItemSelection(true);
+        selectItem(nd);
+        updateSelectedIFFOption();
+
+        const itemSel =
+            document.getElementById('item-sel');
+
+        const liIdx =
+            targetIff.elements.indexOf(nd);
+
+        const li =
+            itemSel.childNodes.values().find(el => el.index == liIdx);
+
+        if (li)
+            li.classList.toggle('new', true);
+
+        await new AlertModal('O item [' + (converted
+                ? getVersaoLabelPorRegiao(srcRegion) + '->' + getVersaoLabelPorRegiao(tgtRegion)
+                : getVersaoLabelPorRegiao(srcRegion))
+            + '/' + targetIff.name + ']: "' + nd.getIdentifyName()
+            + '" foi adicionado da área de transferência.').show();
+    } else {
+        // item já existe: troca os dados e verifica se realmente mudou
+        var ori = new WriterBuffer(existing.getSize());
+        existing.serialize(ori);
+
+        _converteCopiaCampos(existing, nd);
+
+        var curr = new WriterBuffer(existing.getSize());
+
+        existing.serialize(curr);
+        
+        existing.__modified =
+            ori.data.length !== curr.data.length
+            || ori.data.some((b, i) => b !== curr.data[i]);
+
+        ensureItemDescription(existing);
+        ensureCutinInfomation(existing);
+
+        if (targetIff.element_constructor === CadieMagicBox)
+            targetIff.rebuildCadieMagicBox();
+
+        // só agora (tudo certo) troca a seleção de IFF na UI, se necessário
+        if (getSelectedIFF().name !== targetIff.name) {
+            const sel =
+                document.getElementById('iff-sel');
+
+            setSelectValue(sel, targetIff.name);
+            sel.dispatchEvent(new Event('change'));
+        }
+
+        makeItemSelection(true);
+        selectItem(existing);
+        updateSelectedIFFOption();
+
+        await new AlertModal('O item [' + (converted
+                ? getVersaoLabelPorRegiao(srcRegion) + '->' + getVersaoLabelPorRegiao(tgtRegion)
+                : getVersaoLabelPorRegiao(srcRegion))
+            + '/' + targetIff.name + ']: "' + existing.getIdentifyName()
+            + '" ' + (existing.__modified ? 'foi modificado' : 'não foi modificado dados iguais') + ' da área de transferência.').show();
+    }
 }
 
 function deleteItem(evt) {

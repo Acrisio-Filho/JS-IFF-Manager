@@ -11129,6 +11129,15 @@ function getVersaoPackRegiao() {
     return f ? f.__region : 'JP';
 }
 
+// rótulo completo (Fresh Up!,Japão,983) de uma região dada — usado nas
+// mensagens de conversão de região para mostrar a versão em extenso
+function getVersaoLabelPorRegiao(_regiao) {
+    const v =
+        kVersoesSuportadas.find(v => v.regiao === _regiao);
+
+    return v ? v.label : _regiao;
+}
+
 function getVersaoPackTag(_encoding) {
     return '(' + getVersaoPackLabel() + ',' + (_encoding || kCodePage.load) + ')';
 }
