@@ -1647,6 +1647,35 @@ class BitfieldModal extends Modal {
 
         let groupNoInputs = [];
 
+        const warnContainer =
+            document.createElement("div");
+
+        warnContainer.id = "bitfield-condition-warnings";
+
+        const renderWarnings =
+            (value) => {
+
+                warnContainer.innerHTML = '';
+
+                const warnings =
+                    _editor.getConditionWarnings(value);
+
+                warnings.forEach(cw => {
+
+                    const alert =
+                        document.createElement("div");
+
+                    alert.className =
+                        "bitfield-condition-warning";
+
+                    alert.textContent =
+                        cw.message;
+
+                    warnContainer.appendChild(alert);
+
+                });
+            };
+
         // máscara dos bits travados (posições relativas); no modo global é
         // do editor inteiro
         const lockedMaskFor = _group => {
@@ -1767,6 +1796,11 @@ class BitfieldModal extends Modal {
                 this.body.appendChild(modeCore.wrap);
             }
 
+            // render condition warnings
+            this.body.appendChild(warnContainer);
+
+            renderWarnings(_editor.value);
+
             valueInputs.push({
                 group: {
                     bits: _editor.totalBits,
@@ -1858,6 +1892,7 @@ class BitfieldModal extends Modal {
                                     modeCore.value =
                                         value;
 
+                                    renderWarnings(value);
                                 }
                             });
 
@@ -1900,6 +1935,7 @@ class BitfieldModal extends Modal {
 
                     });
 
+                    renderWarnings(value);
                 };
 
         } else {
@@ -1995,6 +2031,8 @@ class BitfieldModal extends Modal {
                                     modeCore.value =
                                         value;
                                 }
+
+                                renderWarnings(value);
                             }
                         });
 
@@ -2049,6 +2087,7 @@ class BitfieldModal extends Modal {
 
                         });
 
+                        renderWarnings(value);
                     };
 
                 }

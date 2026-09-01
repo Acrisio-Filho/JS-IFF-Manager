@@ -5238,7 +5238,10 @@ function itemMatchesState(_item, _state) {
     if (!triMatch(_state.timeShop, !!(obj && obj.shop && obj.shop.time_shop && obj.shop.time_shop.active && obj.shop.time_shop.active.value == 1)))
         return false;
 
-    if (!triMatch(_state.activeDate, !!(obj && obj.date && obj.date.active_date && obj.date.active_date.value == 1)))
+    if (!triMatch(_state.activeDate, !!(
+            obj && obj.date && obj.date.active_date && obj.date.active_date.value == 1
+            || (obj && obj.date && obj.date.date && obj.date.date.some && obj.date.date.some(d => !d.isEmpty()))
+        )))
         return false;
 
     // Level: is_max + comparador com valor (Level/LevelBitfield/LevelValue32/16/8)
@@ -5691,7 +5694,7 @@ function initFilterPanel() {
             titles: { '0': 'Somente sem time_shop', 'any': 'Sem filtro', '1': 'Somente time_shop ativo' },
         }],
         ['tri-active-date', 'f-active-date', {
-            negText: 'NÃO', anyText: '\u2014', posText: 'SIM',
+            negText: 'SEM DATA', anyText: '\u2014', posText: 'COM DATA',
             titles: { '0': 'Somente sem data', 'any': 'Sem filtro', '1': 'Somente data válida' },
         }],
         ['tri-base-discount', 'f-base-discount', {

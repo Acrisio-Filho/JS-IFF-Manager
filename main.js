@@ -1252,6 +1252,17 @@ class FlagShopBitView extends BitfieldType {
     }
 }
 
+const kFlagShopConditionWarning = [
+    {
+        condition: (obj) => {
+            const saleable = obj.is_saleable === 1;
+            const giftable = obj.is_giftable === 1;
+            return saleable && giftable;
+        },
+        message: "Quando 'IS_SALEABLE','IS_GIFTABLE' está ativo o item só tem a opção de compra"
+    }
+];
+
 class FlagShop {
     constructor(_data = undefined) {
         this._buildFields();
@@ -1274,7 +1285,8 @@ class FlagShop {
                     is_saleable: 1,
                     is_giftable: 1,
                     only_display: 1,
-                    unknown2: 1
+                    unknown2: 1,
+                    condition_warning: kFlagShopConditionWarning
                 },
                 0xFFF,
                 { ownsBytes: true }
@@ -1299,7 +1311,8 @@ class FlagShop {
                     block_mail_and_personal_shop: 1,
                     is_saleable: 1,
                     is_giftable: 1,
-                    only_display: 1
+                    only_display: 1,
+                    condition_warning: kFlagShopConditionWarning
                 }
             );
             this.icon = new BitfieldType(

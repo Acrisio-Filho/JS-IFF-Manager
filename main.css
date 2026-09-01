@@ -1390,6 +1390,17 @@ textarea:disabled {
     cursor: not-allowed;
 }
 
+/* alerta de condição do bitfield no modal — aviso em laranja abaixo do input global */
+.bitfield-condition-warning {
+    background: var(--color-warning);
+    color: #fff;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    white-space: pre-wrap;
+}
+
 /* toggle desabilitado no layout (ex.: time_shop.active / active_date
    bloqueados) — mesmo visual/cursor do bit travado no editor de bitfield */
 .iff-toggle input:disabled ~ .iff-track {

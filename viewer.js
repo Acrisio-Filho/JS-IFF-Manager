@@ -1291,9 +1291,13 @@ class BitfieldType {
 
         this.groups = [];
 
+        this.condition_warning = Array.isArray(_definition.condition_warning) ? _definition.condition_warning.slice() : [];
+
         let offset = 0;
 
         Object.entries(_definition).forEach(([name, bits]) => {
+
+            if (name === 'condition_warning') return;
 
             const group = { name, bits, offset };
 
@@ -1460,6 +1464,26 @@ class BitfieldType {
             });
         }
 
+
+        return result;
+    }
+
+    getConditionWarnings(_value) {
+
+        if (!this.condition_warning || this.condition_warning.length === 0)
+            return [];
+
+        const origValue = this._base.value;
+
+        if (_value !== undefined) {
+            this._base.value = _value;
+        }
+
+        const result = this.condition_warning.filter(
+            cw => typeof cw.condition === 'function' && cw.condition(this)
+        );
+
+        this._base.value = origValue;
 
         return result;
     }
