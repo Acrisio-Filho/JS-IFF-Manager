@@ -4136,7 +4136,9 @@ class CaddieItemType {
 class CaddieItem extends Base {
     faceTex = new StringType(40, StringTypeRelation.ASSET.TEXTURE);
     bodyTex = new StringType(40, StringTypeRelation.ASSET.TEXTURE);
-    price = Array(6).fill(0).map(_ => new Int16Type(false, true, true));
+    price = Array(4).fill(0).map(_ => new Int16Type(false, true, true));
+    unit_power_gauge = new Int16Type(false, true, true);
+    point = new Int16Type(false, true, true);
 
     static createTypeidbit(_typeid = 0) {
         return new BitfieldType(
@@ -4182,7 +4184,8 @@ class CaddieItem extends Base {
 
     getSize() {
         return super.getSize() + this.faceTex.getSize() + this.bodyTex.getSize()
-            + this.price.reduce((acc, v) => acc + v.getSize(), 0);
+            + this.price.reduce((acc, v) => acc + v.getSize(), 0)
+            + this.unit_power_gauge.getSize() + this.point.getSize();
     }
 
     unserialize(_data) {
@@ -4190,19 +4193,23 @@ class CaddieItem extends Base {
         this.faceTex.unserialize(_data.getBuffer(this.faceTex.getSize()));
         this.bodyTex.unserialize(_data.getBuffer(this.bodyTex.getSize()));
         this.price.forEach(v => v.unserialize(_data.getBuffer(v.getSize())));
+        this.unit_power_gauge.unserialize(_data.getBuffer(this.unit_power_gauge.getSize()));
+        this.point.unserialize(_data.getBuffer(this.point.getSize()));
     }
     serialize(_data) {
         super.serialize(_data);
         this.faceTex.serialize(_data);
         this.bodyTex.serialize(_data);
         this.price.forEach(v => v.serialize(_data));
+        this.unit_power_gauge.serialize(_data);
+        this.point.serialize(_data);
     }
     layout(_parent) {
         super.layout(_parent);
         this.faceTex.layout(_parent, "faceTex");
         this.bodyTex.layout(_parent, "bodyTex");
 
-        // labels dos períodos do time_shop (ONE_DAY..ETERNAL) SÓ com time_shop
+        // labels dos períodos do time_shop (ONE_DAY..ONE_MONTH) SÓ com time_shop
         // ativo (igual ao Skin/Mascot) — inativo sem labels descritivos
         const priceLabels =
             () => this.shop && this.shop.time_shop && this.shop.time_shop.active
@@ -4241,6 +4248,9 @@ class CaddieItem extends Base {
                 }
             });
         }
+
+        this.unit_power_gauge.layout(_parent, "unit_power_gauge");
+        this.point.layout(_parent, "point");
     }
 }
 
